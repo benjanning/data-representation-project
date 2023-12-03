@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Cars</title>
+    <title>View Cars and Customers</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 
 <body>
+    <!-- Car Section -->
     <h1>CARS</h1>
-    <div> <button id="showCreateButton" class="btn btn-success">Create</button></div>
+    <div> <button id="showCreateCarButton" class="btn btn-success">Create Car</button></div>
     <div>
         <table class="table table-striped table-dark table-bordered table-hover" id="carTable">
             <thead>
@@ -24,202 +25,328 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Table rows will be added here -->
+                <!-- Car Table rows will be added here -->
             </tbody>
         </table>
     </div>
-    <div id='createUpdateForm' style="display: none">
-        <h2><span id="createLabel">Create a</span><span id="updateLabel" style="display: none;">Update</span> CAR</h2>
-        <input type="hidden" name="id"/>
-        Reg <input type="text" name="Reg" /><br/>
-        Model <input type="text" name="Model"/> <br/>
-        Price <input type="number" name="Price"/> <br/>
-        <button id="doCreateButton" class="btn btn-primary">Create</button>
-        <button id="doUpdateButton" class="btn btn-warning" style="display: none;">Update</button>
+    <div id='createUpdateCarForm' style="display: none">
+        <h2><span id="createCarLabel">Create a</span><span id="updateCarLabel" style="display: none;">Update</span> Car</h2>
+        <input type="hidden" id="carId"/>
+        Reg <input type="text" id="carReg" /><br/>
+        Model <input type="text" id="carModel"/> <br/>
+        Price <input type="number" id="carPrice"/> <br/>
+        <button id="doCreateCarButton" class="btn btn-primary">Create Car</button>
+        <button id="doUpdateCarButton" class="btn btn-warning" style="display: none;">Update Car</button>
     </div>
 
+    <!-- Customer Section -->
+    <h1>CUSTOMERS</h1>
+    <div> <button id="showCreateCustomerButton" class="btn btn-success">Create Customer</button></div>
+    <div>
+        <table class="table table-striped table-dark table-bordered table-hover" id="customerTable">
+            <thead>
+                <tr>
+                    <th scope="col">id</th>
+                    <th scope="col">Reg</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Update</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Customer Table rows will be added here -->
+            </tbody>
+        </table>
+    </div>
+    <div id='createUpdateCustomerForm' style="display: none">
+        <h2><span id="createCustomerLabel">Create a</span><span id="updateCustomerLabel" style="display: none;">Update</span> Customer</h2>
+        <input type="hidden" id="customerId"/>
+        Reg <input type="text" id="customerReg"/> <br/>
+        Name <input type="text" id="customerName" /><br/>
+        Price <input type="text" id="customerPrice" /><br/>
+        <button id="doCreateCustomerButton" class="btn btn-primary">Create Customer</button>
+        <button id="doUpdateCustomerButton" class="btn btn-warning" style="display: none;">Update Customer</button>
+    </div>
+
+    <!-- Cars JavaScript -->
     <script>
         $(document).ready(function(){
-            // Event handlers for the showCreate and doCreate buttons
-            $("#showCreateButton").on("click", showCreate);
-            $("#doCreateButton").on("click", doCreate);
-            $("#doUpdateButton").on("click", doUpdate);
-
-            // Fetch all cars on page load
-            getAllAjax();
-
-            // Event delegation for dynamically created update and delete buttons
-            $(document).on("click", ".updateButton", function(){
-                showUpdate(this);
+            $("#showCreateCarButton").on("click", function() {
+                showCreateCar();
             });
-            $(document).on("click", ".deleteButton", function(){
-                doDelete(this);
+            $("#doCreateCarButton").on("click", function() {
+                doCreateCar();
+            });
+            $("#doUpdateCarButton").on("click", function() {
+                doUpdateCar();
             });
 
-            function showCreate(){
-                $("#showCreateButton, #carTable").hide();
-                $("#createUpdateForm").show();
-                $("#createLabel").show();
-                $("#updateLabel").hide();
-                $("#doCreateButton").show();
-                $("#doUpdateButton").hide();
-                clearForm();
+            $(document).on("click", ".updateCarButton", function(){
+                var carId = $(this).closest("tr").data("id");
+                showUpdateCar(carId);
+            });
+            $(document).on("click", ".deleteCarButton", function(){
+                var carId = $(this).closest("tr").data("id");
+                doDeleteCar(carId);
+            });
+
+            getAllCars();
+
+            function showCreateCar() {
+                clearCarForm();
+                $("#createUpdateCarForm").show();
+                $("#createCarLabel").show();
+                $("#updateCarLabel").hide();
+                $("#doCreateCarButton").show();
+                $("#doUpdateCarButton").hide();
             }
 
-            function showViewAll(){
-                $("#showCreateButton, #carTable").show();
-                $("#createUpdateForm").hide();
+            function clearCarForm() {
+                $("#carId").val('');
+                $("#carReg").val('');
+                $("#carModel").val('');
+                $("#carPrice").val('');
             }
 
-            function showUpdate(buttonElement){
-                $("#showCreateButton, #carTable").hide();
-                $("#createUpdateForm").show();
-                $("#createLabel").hide();
-                $("#updateLabel").show();
-                $("#doCreateButton").hide();
-                $("#doUpdateButton").show();
-
-                var rowElement = $(buttonElement).closest("tr");
-                var car = getCarFromRow(rowElement);
-                populateFormWithCar(car);
-            }
-
-            function doCreate(){
-                var car = getCarFromForm();
-                createCarAjax(car);
-            }
-
-            function doUpdate(){
-                var car = getCarFromForm();
-                updateCarAjax(car);
-            }
-
-            function doDelete(buttonElement){
-                var rowElement = $(buttonElement).closest("tr");
-                var carId = rowElement.data("id");
-                deleteCarAjax(carId);
-            }
-
-            function addCarToTable(car){
-                var rowElement = $("<tr>").data("id", car.id);
-                $("<td>").text(car.id).appendTo(rowElement);
-                $("<td>").text(car.Reg).appendTo(rowElement);
-                $("<td>").text(car.Model).appendTo(rowElement);
-                $("<td>").text(car.Price).appendTo(rowElement);
-                $("<td>").html('<button class="updateButton btn btn-primary">Update</button>').appendTo(rowElement);
-                $("<td>").html('<button class="deleteButton btn btn-danger">Delete</button>').appendTo(rowElement);
-                $("#carTable tbody").append(rowElement);
-            }
-
-            function clearForm(){
-                $("#createUpdateForm").find('input[type="text"], input[type="number"]').val('');
-            }
-
-            function getCarFromRow(rowElement){
-                return {
-                    id: rowElement.data('id'),
-                    Reg: rowElement.find('td:eq(1)').text(),
-                    Model: rowElement.find('td:eq(2)').text(),
-                    Price: parseInt(rowElement.find('td:eq(3)').text(), 10)
-                };
-            }
-
-            function setCarInRow(car){
-                var rowElement = $("#carTable tbody").find('tr').filter(function() {
-                    return $(this).data("id") === car.id;
-                });
-                rowElement.find('td:eq(0)').text(car.id);
-                rowElement.find('td:eq(1)').text(car.Reg);
-                rowElement.find('td:eq(2)').text(car.Model);
-                rowElement.find('td:eq(3)').text(car.Price);
-            }
-
-            function populateFormWithCar(car){
-                var form = $("#createUpdateForm");
-                form.find('input[name="id"]').val(car.id);
-                form.find('input[name="Reg"]').val(car.Reg);
-                form.find('input[name="Model"]').val(car.Model);
-                form.find('input[name="Price"]').val(car.Price);
-            }
-
-            function getCarFromForm(){
-                var form = $("#createUpdateForm");
-                return {
-                    id: form.find('input[name="id"]').val(),
-                    Reg: form.find('input[name="Reg"]').val(),
-                    Model: form.find('input[name="Model"]').val(),
-                    Price: parseInt(form.find('input[name="Price"]').val(), 10)
-                };
-            }
-
-            function getAllAjax(){
-                $.ajax({
-                    url: "http://127.0.0.1:5000/cars",
-                    method: "GET",
-                    dataType: "JSON",
-                    success: function(result){
-                        result.forEach(function(car) {
-                            addCarToTable(car);
-                        });
-                    },
-                    error: function(xhr, status, error){
-                        alert("An error occurred while fetching cars: " + status + " " + error);
-                    }
+            function showUpdateCar(carId) {
+                $.get("http://127.0.0.1:5000/cars/" + carId, function(car) {
+                    $("#carId").val(car.id);
+                    $("#carReg").val(car.Reg);
+                    $("#carModel").val(car.Model);
+                    $("#carPrice").val(car.Price);
+                    $("#createUpdateCarForm").show();
+                    $("#createCarLabel").hide();
+                    $("#updateCarLabel").show();
+                    $("#doCreateCarButton").hide();
+                    $("#doUpdateCarButton").show();
                 });
             }
 
-            function createCarAjax(car){
+            function doCreateCar() {
+                var car = {
+                    Reg: $("#carReg").val(),
+                    Model: $("#carModel").val(),
+                    Price: $("#carPrice").val()
+                };
                 $.ajax({
                     url: "http://127.0.0.1:5000/cars",
                     method: "POST",
+                    contentType: "application/json",
                     data: JSON.stringify(car),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "JSON",
-                    success: function(result){
-                        addCarToTable(result);
-                        clearForm();
-                        showViewAll();
-                    },
-                    error: function(xhr, status, error){
-                        alert("An error occurred while creating car: " + status + " " + error);
+                    success: function(newCar) {
+                        addCarToTable(newCar);
+                        clearCarForm();
+                        $("#createUpdateCarForm").hide();
                     }
                 });
             }
 
-            function updateCarAjax(car){
+            function doUpdateCar() {
+                var car = {
+                    id: $("#carId").val(),
+                    Reg: $("#carReg").val(),
+                    Model: $("#carModel").val(),
+                    Price: $("#carPrice").val()
+                };
                 $.ajax({
-                    url: "http://127.0.0.1:5000/cars/" + encodeURIComponent(car.id),
+                    url: "http://127.0.0.1:5000/cars/" + car.id,
                     method: "PUT",
+                    contentType: "application/json",
                     data: JSON.stringify(car),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "JSON",
-                    success: function(result){
-                        setCarInRow(result);
-                        clearForm();
-                        showViewAll();
-                    },
-                    error: function(xhr, status, error){
-                        alert("An error occurred while updating car: " + status + " " + error);
+                    success: function(updatedCar) {
+                        updateCarInTable(updatedCar);
+                        clearCarForm();
+                        $("#createUpdateCarForm").hide();
                     }
                 });
             }
 
-            function deleteCarAjax(id){
+            function doDeleteCar(carId) {
                 $.ajax({
-                    url: "http://127.0.0.1:5000/cars/" + encodeURIComponent(id),
+                    url: "http://127.0.0.1:5000/cars/" + carId,
                     method: "DELETE",
-                    dataType: "JSON",
-                    success: function(result){
-                        $("#carTable tbody").find('tr').filter(function() {
-                            return $(this).data("id") === id;
-                        }).remove();
-                    },
-                    error: function(xhr, status, error){
-                        alert("An error occurred while deleting car: " + status + " " + error);
+                    success: function() {
+                        removeCarFromTable(carId);
                     }
                 });
+            }
+
+            function getAllCars() {
+                $.get("http://127.0.0.1:5000/cars", function(cars) {
+                    cars.forEach(function(car) {
+                        addCarToTable(car);
+                    });
+                });
+            }
+
+            function addCarToTable(car) {
+                var row = $('<tr>').data("id", car.id);
+                row.append($('<td>').text(car.id));
+                row.append($('<td>').text(car.Reg));
+                row.append($('<td>').text(car.Model));
+                row.append($('<td>').text(car.Price));
+                row.append($('<td>').html('<button class="updateCarButton btn btn-primary">Update</button>'));
+                row.append($('<td>').html('<button class="deleteCarButton btn btn-danger">Delete</button>'));
+                $("#carTable tbody").append(row);
+            }
+
+            function updateCarInTable(car) {
+                var row = $("#carTable tbody").find('tr').filter(function() {
+                    return $(this).data("id") == car.id;
+                });
+                row.find('td:eq(1)').text(car.Reg);
+                row.find('td:eq(2)').text(car.Model);
+                row.find('td:eq(3)').text(car.Price);
+            }
+
+            function removeCarFromTable(carId) {
+                $("#carTable tbody").find('tr').filter(function() {
+                    return $(this).data("id") == carId;
+                }).remove();
             }
         });
+    </script>
+
+    <!-- Customers JavaScript -->
+    <script>
+        $(document).ready(function(){
+            $("#showCreateCustomerButton").on("click", function() {
+                showCreateCustomer();
+            });
+            $("#doCreateCustomerButton").on("click", function() {
+                doCreateCustomer();
+            });
+            $("#doUpdateCustomerButton").on("click", function() {
+                doUpdateCustomer();
+            });
+
+            $(document).on("click", ".updateCustomerButton", function(){
+                var customerId = $(this).closest("tr").data("id");
+                showUpdateCustomer(customerId);
+            });
+            $(document).on("click", ".deleteCustomerButton", function(){
+                var customerId = $(this).closest("tr").data("id");
+                doDeleteCustomer(customerId);
+            });
+
+            getAllCustomer();
+
+            function showCreateCustomer() {
+                clearCustomerForm();
+                $("#createUpdateCustomerForm").show();
+                $("#createCustomerLabel").show();
+                $("#updateCustomerLabel").hide();
+                $("#doCreateCustomerButton").show();
+                $("#doUpdateCustomerButton").hide();
+            }
+
+            function clearCustomerForm() {
+                $("#customerId").val('');
+                $("#customerReg").val('');
+                $("#customerName").val('');
+                $("#customerPrice").val('');
+            }
+
+            function showUpdateCustomer(customerId) {
+                $.get("http://127.0.0.1:5000/customer/" + customerId, function(customer) {
+                    $("#customerId").val(customer.id);
+                    $("#customerReg").val(customer.Reg);
+                    $("#customerName").val(customer.Name);
+                    $("#customerPrice").val(customer.Price);
+                    $("#createUpdateCustomerForm").show();
+                    $("#createCustomerLabel").hide();
+                    $("#updateCustomerLabel").show();
+                    $("#doCreateCustomerButton").hide();
+                    $("#doUpdateCustomerButton").show();
+                });
+            }
+
+            function doCreateCustomer() {
+                var customer = {
+                    Reg: $("#customerReg").val(),
+                    Name: $("#customerName").val(),
+                    Price: $("#customerPrice").val()
+                };
+                $.ajax({
+                    url: "http://127.0.0.1:5000/customer",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(customer),
+                    success: function(newCustomer) {
+                        addCustomerToTable(newCustomer);
+                        clearCustomerForm();
+                        $("#createUpdateCustomerForm").hide();
+                    }
+                });
+            }
+        
+            function doUpdateCustomer() {
+                var customer = {
+                    id: $("#customerId").val(),
+                    Reg: $("#customerReg").val(),
+                    Name: $("#customerName").val(),
+                    Price: $("#customerPrice").val()
+                };
+                $.ajax({
+                    url: "http://127.0.0.1:5000/customer/" + customer.id,
+                    method: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify(customer),
+                    success: function(updatedCustomer) {
+                        updateCustomerInTable(updatedCustomer);
+                        clearCustomerForm();
+                        $("#createUpdateCustomerForm").hide();
+                    }
+                });
+            }
+        
+
+            function doDeleteCustomer(customerId) {
+                $.ajax({
+                    url: "http://127.0.0.1:5000/customer/" + customerId,
+                    method: "DELETE",
+                    success: function() {
+                        removeCustomerFromTable(customerId);
+                    }
+                });
+            }
+
+            function getAllCustomer() {
+                $.get("http://127.0.0.1:5000/customer", function(customer) {
+                    customer.forEach(function(customer) {
+                        addCustomerToTable(customer);
+                    });
+                });
+            }
+
+            function addCustomerToTable(customer) {
+                var row = $('<tr>').data("id", customer.id);
+                row.append($('<td>').text(customer.id));
+                row.append($('<td>').text(customer.Reg));
+                row.append($('<td>').text(customer.Name));
+                row.append($('<td>').text(customer.Price));
+                row.append($('<td>').html('<button class="updateCustomerButton btn btn-primary">Update</button>'));
+                row.append($('<td>').html('<button class="deleteCustomerButton btn btn-danger">Delete</button>'));
+                $("#customerTable tbody").append(row);
+            }
+        
+            function updateCustomerInTable(customer) {
+                var row = $("#customerTable tbody").find('tr').filter(function() {
+                    return $(this).data("id") == customer.id;
+                });
+                row.find('td:eq(1)').text(customer.Reg);
+                row.find('td:eq(2)').text(customer.Name);
+                row.find('td:eq(3)').text(customer.Price);
+            }
+
+            function removeCustomerFromTable(customerId) {
+                $("#customerTable tbody").find('tr').filter(function() {
+                    return $(this).data("id") == customerId;
+                }).remove();
+            }
+        });
+
     </script>
 </body>
 </html>

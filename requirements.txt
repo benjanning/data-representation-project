@@ -1,5 +1,6 @@
 PyMySQl - pip install pymysql
 mysql-connector-python==8.0.22
+Flask-HTTPAuth
 click==7.1.2
 Flask==1.1.2
 itsdangerous==1.1.0
