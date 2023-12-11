@@ -31,12 +31,11 @@ Login details:
 ![Page View](./images/pageview.jpg)
 
 ### 1) On Python Anywhere (online/easiest way)
-[Python Anywhere - https://benjanning2.pythonanywhere.com/home ](https://benjanning2.pythonanywhere.com/home) 
 
 https://benjanning2.pythonanywhere.com/home
 
 Here is a link to the folder, where I modified the code and used it to deploy the app to Python anywhere:
-[Deploy Folder - https://github.com/benjanning/deploytopythonanywhere](https://github.com/benjanning/deploytopythonanywhere) 
+https://github.com/benjanning/deploytopythonanywhere
 
 ### 2) Locally (on your machine)
 - Clone the repository to your machine.
