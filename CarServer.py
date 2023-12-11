@@ -90,7 +90,6 @@ def delete(id):
 
 # Customer Routes
 
-
 @app.route('/customer', methods=['GET'])
 def getAllCustomer():
     try:

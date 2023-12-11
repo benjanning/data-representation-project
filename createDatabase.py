@@ -10,13 +10,13 @@ db = pymysql.connect(
     password = ""
     )
 
-
+# Create the Database
 cursor = db.cursor() 
 cursor.execute("DROP DATABASE IF EXISTS bencars")
 cursor.execute("CREATE DATABASE bencars")
 cursor.execute("USE bencars")
 
-
+# Create the cars Table
 cursor.execute("CREATE TABLE cars(\
     id int NOT NULL AUTO_INCREMENT,\
     reg varchar(250),\
@@ -25,6 +25,7 @@ cursor.execute("CREATE TABLE cars(\
     PRIMARY KEY(id)\
     )") 
 
+# Create the Customer Table
 cursor.execute("CREATE TABLE customer(\
     id int NOT NULL AUTO_INCREMENT,\
     reg varchar(250),\
@@ -33,6 +34,7 @@ cursor.execute("CREATE TABLE customer(\
     PRIMARY KEY(id)\
     )") 
 
+# Insert values
 sql1= ("insert into cars (reg, model, price) values ('11C10623', 'Skoda Fabia', 13000)")
 
 sql2= ("insert into cars (reg, model, price) values ('11K456', 'Audi A3', 20000)")
