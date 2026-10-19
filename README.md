@@ -49,7 +49,7 @@ Browser interface (static/CarServer.html)
 
 1. Install Python and MySQL; create a virtual environment.
 2. Install the packages in [requirements.txt](./requirements.txt) (`pip install -r requirements.txt`).
-3. Configure a **local test** MySQL server in `dbconfig.py`.
+3. Set `DB_HOST`, `DB_USER`, `DB_PASSWORD` and `DB_NAME` for a **local test** MySQL server, plus `DEMO_USERNAME` and `DEMO_PASSWORD` for the example login. Do not use real credentials.
 4. Run `python createDatabase.py`, then `python CarServer.py`.
 5. Open the local URL printed by Flask.
 
