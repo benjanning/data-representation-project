@@ -12,6 +12,11 @@ class ApiTests(unittest.TestCase):
     def test_invalid_records(self):
         for payload in [{}, {'Reg':'R','Model':'M','Price':-1}, []]:
             self.assertEqual(self.client.post('/cars',json=payload).status_code,400)
+    def test_price_domain_and_missing_deletes(self):
+        for price in [True, 1.5, float('inf'), 1000000001]:
+            self.assertEqual(self.client.post('/cars',json=dict(Reg='TEST',Model='Demo',Price=price)).status_code,400)
+        for route in ['/cars/999999','/customer/999999']:
+            self.assertEqual(self.client.delete(route).status_code,404)
     def test_crud(self):
         for route, payload in [('/cars',dict(Reg='TEST',Model='Demo',Price=25)),('/customer',dict(Reg='TEST',Name='Sample',Price=25))]:
             created = self.client.post(route,json=payload)

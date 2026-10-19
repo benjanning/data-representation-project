@@ -55,12 +55,15 @@ def validate_record(record, label):
         abort(400)
     price = record.get('Price')
     try:
+        if isinstance(price, bool):
+            abort(400)
         numeric = float(price)
         import math
-        if not math.isfinite(numeric) or numeric < 0:
+        if not math.isfinite(numeric) or not numeric.is_integer() or not 0 <= numeric <= 1000000000:
             abort(400)
     except (TypeError, ValueError):
         abort(400)
+    record['Price'] = int(numeric)
 
 # Cars Routes
 
@@ -128,6 +131,8 @@ def update(id):
 @app.route('/cars/<int:id>', methods=['DELETE'])
 def delete(id):
     try:
+        if not CarDao.findByID(id):
+            abort(404)
         CarDao.delete(id)
         return jsonify({"done": True})
     except HTTPException:
@@ -203,6 +208,8 @@ def updateCustomer(id):
 @app.route('/customer/<int:id>', methods=['DELETE'])
 def deleteCustomer(id):
     try:
+        if not CustomerDao.findByID(id):
+            abort(404)
         CustomerDao.delete(id)
         return jsonify({"done": True})
     except HTTPException:

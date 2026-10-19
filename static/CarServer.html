@@ -34,9 +34,9 @@ body{background:#f3f6f5;color:#193b38;font-family:Arial,sans-serif;padding:42px;
     <div id='createUpdateCarForm' style="display: none">
         <h2><span id="createCarLabel">Create a</span><span id="updateCarLabel" style="display: none;">Update</span> Car</h2>
         <input type="hidden" id="carId"/>
-        Reg <input type="text" id="carReg" /><br/>
-        Model <input type="text" id="carModel"/> <br/>
-        Price <input type="number" id="carPrice"/> <br/>
+        <label for="carReg">Reg</label> <input type="text" id="carReg" /><br/>
+        <label for="carModel">Model</label> <input type="text" id="carModel"/> <br/>
+        <label for="carPrice">Price</label> <input type="number" id="carPrice"/> <br/>
         <button id="doCreateCarButton" class="btn btn-primary">Create Car</button>
         <button id="doUpdateCarButton" class="btn btn-warning" style="display: none;">Update Car</button>
     </div>
@@ -64,9 +64,9 @@ body{background:#f3f6f5;color:#193b38;font-family:Arial,sans-serif;padding:42px;
     <div id='createUpdateCustomerForm' style="display: none">
         <h2><span id="createCustomerLabel">Create a</span><span id="updateCustomerLabel" style="display: none;">Update</span> Customer</h2>
         <input type="hidden" id="customerId"/>
-        Reg <input type="text" id="customerReg"/> <br/>
-        Name <input type="text" id="customerName" /><br/>
-        Price <input type="text" id="customerPrice" /><br/>
+        <label for="customerReg">Reg</label> <input type="text" id="customerReg"/> <br/>
+        <label for="customerName">Name</label> <input type="text" id="customerName" /><br/>
+        <label for="customerPrice">Price</label> <input type="text" id="customerPrice" /><br/>
         <button id="doCreateCustomerButton" class="btn btn-primary">Create Customer</button>
         <button id="doUpdateCustomerButton" class="btn btn-warning" style="display: none;">Update Customer</button>
     </div>
