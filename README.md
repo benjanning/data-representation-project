@@ -59,4 +59,10 @@ A separate [PythonAnywhere deployment experiment](https://github.com/benjanning/
 
 ---
 
-Part of my Higher Diploma in Computing (Data Analytics). [View the full portfolio](https://github.com/benjanning/programming2022).
+Part of my Higher Diploma in Computing (Data Analytics). [View the full portfolio](https://benjanning.github.io/projects/).
+
+## Verified local demonstration (October 2026)
+
+Install the updated requirements in a virtual environment. In PowerShell, run `$env:DEMO_MODE="1"` and `python CarServer.py`; on macOS/Linux run `DEMO_MODE=1 python CarServer.py`. Open http://127.0.0.1:5000. This explicit mode uses temporary synthetic records, not MySQL. Run `python -m unittest test_api.py`.
+
+The original MySQL path remains available with DEMO_MODE unset and DB_* plus DEMO_USERNAME/DEMO_PASSWORD configured. API routes now require demo authentication in MySQL mode. MySQL integration has not been executed in this review. The setup script preserves existing databases and seeds only empty tables. The interface was refreshed while retaining its existing table/form workflows. Missing records retain HTTP 404; record inputs are checked. This remains a local academic prototype.
