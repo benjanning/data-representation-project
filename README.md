@@ -1,67 +1,62 @@
-# Data Representation Project
-### Project for the Data Representation module as part of the Higher Diploma in Data Analytics ATU
-### Lecturer: Andrew Beatty
+# Car Rental Management — Full-Stack Web Application
 
-## Concept
-Designing a Web Application, which uses:
+**Python · Flask · REST API · MySQL · HTML · JavaScript · AJAX**
 
-![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
-![API](https://img.shields.io/badge/API-0298c3?style=for-the-badge&logo=Postman&logoColor=white)
-![SQL](https://img.shields.io/badge/SQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![AJAX](https://img.shields.io/badge/AJAX-3b2e5a?style=for-the-badge&logo=ajax&logoColor=white)
+An educational full-stack application with a browser interface and a Python API for working with **cars and customers** in a relational database.
 
-- A Flask server.
-- REST API (to perform CRUD operations)
-- Two database tables.
-- An accompanying web interface (html/javascript)
-- AJAX calls used to perform CRUD operations.
-- Authorisation for logging in.
+![Application screenshot](./images/pageview.jpg)
 
-## Car Rental Database with a Cars and Customer Table
+## Why this project matters
 
-![Car Rental Database with a Cars and Customer Table](./images/rentalcars.jpg)
+Rather than analysing a dataset in isolation, this project brings together application structure, data persistence and user-facing workflows. It demonstrates how a frontend, API routes and SQL database fit together.
 
-## How To Run this Project
+## Features in the coursework
 
-Login details: 
-- username: user 
-- password: password
+- Flask server exposing car and customer endpoints.
+- REST-style operations for creating, viewing, updating and deleting records.
+- MySQL data access layer and database initialisation script.
+- HTML and JavaScript frontend with asynchronous requests.
+- Basic demonstration login mechanism.
 
-![Page View](./images/pageview.jpg)
+## Architecture
 
-### 1) On Python Anywhere (online/easiest way)
+```text
+Browser interface (static/CarServer.html)
+             │  HTTP / AJAX
+             ▼
+       Flask (CarServer.py)
+             │
+             ▼
+    CarDao.py / CustomerDao.py
+             │
+             ▼
+          MySQL database
+```
 
-https://benjanning2.pythonanywhere.com/home
+## Project files
 
-Here is a link to the folder, where I modified the code and used it to deploy the app to Python anywhere:
-https://github.com/benjanning/deploytopythonanywhere
+| File | Role |
+| --- | --- |
+| [CarServer.py](./CarServer.py) | Flask application and endpoints |
+| [CarDao.py](./CarDao.py) | Car data operations |
+| [CustomerDao.py](./CustomerDao.py) | Customer data operations |
+| [createDatabase.py](./createDatabase.py) | Database setup |
+| [dbconfig.py](./dbconfig.py) | Local MySQL connection settings |
+| [static/CarServer.html](./static/CarServer.html) | Browser interface |
+| [testCarDao.py](./testCarDao.py) | Data access exercises/tests |
 
-### 2) Locally (on your machine)
-- Clone the repository to your machine.
-- Open a virtual enviroment in cmder and follow the steps below.
+## Run locally
 
-![Venv Steps](./images/venv.jpg)
+1. Install Python and MySQL; create a virtual environment.
+2. Install the packages in [requirements.txt](./requirements.txt) (`pip install -r requirements.txt`).
+3. Configure a **local test** MySQL server in `dbconfig.py`.
+4. Run `python createDatabase.py`, then `python CarServer.py`.
+5. Open the local URL printed by Flask.
 
-- Run MySql, or Wamp Server (which i used for this project). (Connection details are in dbconfig.py file).
-- Run createDatabase.py 
-- Run CarServer.py
-- Copy the url seen in the terminal in to your web browser and use the application.
- 
-# References 
-[1] Andrew Beatty Lectures and Reference Code - Data Representation, ATU - 2023. https://github.com/andrewbeattycourseware/datarepresentation
+A separate [PythonAnywhere deployment experiment](https://github.com/benjanning/deploytopythonanywhere) is also available. Its historical hosted demo may no longer be running.
 
-[2] Flask Web Application: A Comprehensive Guide, Glinteco. https://glinteco.com/en/post/best-practices-for-setting-up-a-flask-web-application-a-comprehensive-guide
+**Security and maturity:** This is coursework code, not a production-hardened booking system. The demo authentication, input validation, configuration and error handling would need strengthening for real users. Do not deploy it with the example credentials.
 
-[3] Flask Framework Features and Best Practices, Glinteco. https://glinteco.com/en/post/best-practices-for-setting-up-a-flask-web-application-a-comprehensive-guide
+---
 
-[4] Virtual Environments in Python Development, Glinteco. https://glinteco.com/en/post/best-practices-for-setting-up-a-flask-web-application-a-comprehensive-guide
-
-[5] Database Integration and ORM in Flask, Glinteco. https://glinteco.com/en/post/best-practices-for-setting-up-a-flask-web-application-a-comprehensive-guide
-
-[6] SQL Server Database Design Best Practices, SQLNetHub. https://www.sqlnethub.com/
-
-[7] JavaScript Best Practices for Front-End Development, DEV Community. https://dev.to/lakshmananarumugam/front-end-practice-top-25-javascript-code-best-practices-for-development-4c1d
-
-[8] What Is Ajax & How Is It Used In Modern Web Development?, Vandelay Design. https://www.vandelaydesign.com/what-is-ajax-webdev/
-
+Part of my Higher Diploma in Computing (Data Analytics). [View the full portfolio](https://github.com/benjanning/programming2022).
