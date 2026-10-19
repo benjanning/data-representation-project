@@ -7,9 +7,13 @@ app = Flask(__name__, static_url_path='', static_folder='static')
 auth = HTTPBasicAuth()
 
 # Authentication details
-USER_DATA = {
-    "user": "password"
-}
+import os
+
+# Explicit demo configuration is required. Never use hard-coded accounts
+# in a publicly hosted app.
+USER_DATA = {}
+if os.getenv("DEMO_USERNAME") and os.getenv("DEMO_PASSWORD"):
+    USER_DATA[os.environ["DEMO_USERNAME"]] = os.environ["DEMO_PASSWORD"]
 
 @auth.verify_password
 def verify_password(username, password):
