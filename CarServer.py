@@ -1,222 +1,85 @@
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, Response
 from flask_httpauth import HTTPBasicAuth
-import os
 from werkzeug.exceptions import HTTPException
+from pathlib import Path
+from urllib.parse import urlparse
+from validation import validate_record
+import os
 
-DEMO_MODE = os.getenv("DEMO_MODE") == "1"
+DEMO_MODE=os.getenv('DEMO_MODE')=='1'
 if DEMO_MODE:
-    from demo_store import CarDao, CustomerDAO
+    from demo_store import CarDao,CustomerDAO,SEED
 else:
     from CarDao import CarDao
     from CustomerDao import CustomerDAO
-
-app = Flask(__name__, static_url_path='', static_folder='static')
-auth = HTTPBasicAuth()
-
+app=Flask(__name__,static_url_path='',static_folder='static')
+app.config['MAX_CONTENT_LENGTH']=16384
+auth=HTTPBasicAuth()
+CustomerDao=CustomerDAO()
+USER_DATA={}
+if os.getenv('DEMO_USERNAME') and os.getenv('DEMO_PASSWORD'):
+    USER_DATA[os.environ['DEMO_USERNAME']]=os.environ['DEMO_PASSWORD']
+@auth.verify_password
+def verify_password(username,password):
+    from hmac import compare_digest
+    if username in USER_DATA and compare_digest(USER_DATA[username],password):return username
 @app.before_request
 def protect_api():
-    # Demo records are synthetic and the development server binds to loopback.
-    if not DEMO_MODE and request.path.startswith(('/cars', '/customer')):
-        return auth.login_required(lambda: None)()
-
-@app.errorhandler(400)
-def bad_request(error):
-    return jsonify(error='Invalid request'), 400
-
-
-# Authentication details
-
-# Explicit demo configuration is required. Never use hard-coded accounts
-# in a publicly hosted app.
-USER_DATA = {}
-if os.getenv("DEMO_USERNAME") and os.getenv("DEMO_PASSWORD"):
-    USER_DATA[os.environ["DEMO_USERNAME"]] = os.environ["DEMO_PASSWORD"]
-
-@auth.verify_password
-def verify_password(username, password):
-    from hmac import compare_digest
-    if username in USER_DATA and compare_digest(USER_DATA[username], password):
-        return username
-
+    if request.method in ['POST','PUT','DELETE']:
+        origin=request.headers.get('Origin')
+        if origin and urlparse(origin).netloc!=request.host:abort(403,'Cross-origin changes are not allowed.')
+    if not DEMO_MODE and (request.path=='/' or request.path.startswith(('/cars','/customer','/api/'))):
+        return auth.login_required(lambda:None)()
+@app.after_request
+def headers(response):
+    response.headers['X-Content-Type-Options']='nosniff'
+    response.headers['Referrer-Policy']='same-origin'
+    response.headers['Content-Security-Policy']="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"
+    if request.path.startswith(('/cars','/customer','/api/')):response.headers['Cache-Control']='no-store'
+    return response
+@app.errorhandler(HTTPException)
+def known_error(e):
+    descriptions={400:'Invalid request.',404:'This record no longer exists. Refresh and try again.',405:'This action is not supported.',413:'The submitted record is too large.',415:'Send a JSON object.'}
+    return jsonify(error=descriptions.get(e.code,e.description)),e.code
+@app.errorhandler(Exception)
+def unavailable(e):
+    app.logger.error('Record storage request failed: %s',type(e).__name__)
+    return jsonify(error='Record storage is unavailable. Your form is preserved; try again.'),503
 @app.route('/')
+@app.route('/CarServer.html')
 def home():
-    if not DEMO_MODE:
-        return auth.login_required(lambda: app.send_static_file('CarServer.html'))()
-    # Serve the HTML file
-    return app.send_static_file('CarServer.html')
-
-# Initialize Customer Dao
-CustomerDao = CustomerDAO()
-
-def validate_record(record, label):
-    if not isinstance(record, dict):
-        abort(400)
-    if not all(isinstance(record.get(k), str) and 0 < len(record[k].strip()) <= 250 for k in ['Reg', label]):
-        abort(400)
-    price = record.get('Price')
-    try:
-        if isinstance(price, bool):
-            abort(400)
-        numeric = float(price)
-        import math
-        if not math.isfinite(numeric) or not numeric.is_integer() or not 0 <= numeric <= 1000000000:
-            abort(400)
-    except (TypeError, ValueError):
-        abort(400)
-    record['Price'] = int(numeric)
-
-# Cars Routes
-
-@app.route('/cars', methods=['GET'])
-def getAll():
-    try:
-        results = CarDao.getAll()
-        return jsonify(results)
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error getting cars: {e}")
-        abort(500)
-
-@app.route('/cars/<int:id>', methods=['GET'])
-def findById(id):
-    try:
-        foundCar = CarDao.findByID(id)
-        if foundCar:
-            return jsonify(foundCar)
-        else:
-            abort(404)
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error finding car with id {id}: {e}")
-        abort(500)
-
-@app.route('/cars', methods=['POST'])
-def create():
-    if not request.json:
-        abort(400, 'Missing JSON in request')
-
-    car_details = request.json
-    validate_record(car_details, "Model")
-    try:
-        newId = CarDao.create(car_details)
-        car_details['id'] = newId
-        return jsonify(car_details), 201
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error creating car: {e}")
-        abort(500)
-
-@app.route('/cars/<int:id>', methods=['PUT'])
-def update(id):
-    foundCar = CarDao.findByID(id)
-    if not foundCar:
-        abort(404)
-
-    if not request.json:
-        abort(400, 'Missing JSON in request')
-
-    try:
-        validate_record(request.json, "Model")
-        CarDao.update(id, request.json)
-        return jsonify(request.json)
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error updating car with id {id}: {e}")
-        abort(500)
-
-@app.route('/cars/<int:id>', methods=['DELETE'])
-def delete(id):
-    try:
-        if not CarDao.findByID(id):
-            abort(404)
-        CarDao.delete(id)
-        return jsonify({"done": True})
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error deleting car with id {id}: {e}")
-        abort(500)
-
-
-# Customer Routes
-
-@app.route('/customer', methods=['GET'])
-def getAllCustomer():
-    try:
-        results = CustomerDao.getAll()
-        return jsonify(results)
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error getting customer: {e}")
-        abort(500)
-
-@app.route('/customer/<int:id>', methods=['GET'])
-def findCustomerById(id):
-    try:
-        foundCustomer = CustomerDao.findByID(id)
-        if foundCustomer:
-            return jsonify(foundCustomer)
-        else:
-            abort(404)
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error finding customer with id {id}: {e}")
-        abort(500)
-
-@app.route('/customer', methods=['POST'])
-def createCustomer():
-    if not request.json:
-        abort(400, 'Missing JSON in request')
-
-    customer_details = request.json
-    validate_record(customer_details, "Name")
-    try:
-        newId = CustomerDao.create(customer_details)
-        customer_details['id'] = newId
-        return jsonify(customer_details), 201
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error creating customer: {e}")
-        abort(500)
-
-@app.route('/customer/<int:id>', methods=['PUT'])
-def updateCustomer(id):
-    foundCustomer = CustomerDao.findByID(id)
-    if not foundCustomer:
-        abort(404)
-
-    if not request.json:
-        abort(400, 'Missing JSON in request')
-
-    try:
-        validate_record(request.json, "Name")
-        CustomerDao.update(id, request.json)
-        return jsonify(request.json)
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error updating customer with id {id}: {e}")
-        abort(500)
-
-@app.route('/customer/<int:id>', methods=['DELETE'])
-def deleteCustomer(id):
-    try:
-        if not CustomerDao.findByID(id):
-            abort(404)
-        CustomerDao.delete(id)
-        return jsonify({"done": True})
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error deleting customer with id {id}: {e}")
-        abort(500)
-
-if __name__ == '__main__':
-    app.run(host="127.0.0.1", debug=False)
+    html=(Path(app.static_folder)/'index.html').read_text(encoding='utf-8')
+    return Response(html.replace('data-mode="static"','data-mode="server"'),mimetype='text/html')
+def register(route,store,label):
+    def listing():return jsonify(store.getAll())
+    def find(id):
+        record=store.findByID(id)
+        if not record:abort(404)
+        return jsonify(record)
+    def write(id=None):
+        if id is not None and not store.findByID(id):abort(404)
+        try:record=validate_record(request.get_json(),label)
+        except ValueError as e:return jsonify(error=str(e)),400
+        duplicate=next((v for v in store.getAll() if v['id']!=id and v['Reg'].casefold()==record['Reg'].casefold() and (label=='Model' or v['Name'].casefold()==record['Name'].casefold())),None)
+        if duplicate:return jsonify(error='That vehicle reference or customer/reference pair already exists.'),409
+        if id is None:id=store.create(record);status=201
+        else:store.update(id,record);status=200
+        return jsonify(dict(record,id=id)),status
+    def delete(id):
+        if not store.findByID(id):abort(404)
+        store.delete(id);return jsonify(done=True)
+    app.add_url_rule(route,route+'list',listing,methods=['GET'])
+    app.add_url_rule(route,route+'create',write,methods=['POST'])
+    app.add_url_rule(route+'/<int:id>',route+'find',find,methods=['GET'])
+    app.add_url_rule(route+'/<int:id>',route+'update',write,methods=['PUT'])
+    app.add_url_rule(route+'/<int:id>',route+'delete',delete,methods=['DELETE'])
+register('/cars',CarDao,'Model')
+register('/customer',CustomerDao,'Name')
+@app.post('/api/demo/reset')
+def reset():
+    if not DEMO_MODE:abort(404)
+    CarDao.reset(SEED['cars']);CustomerDao.reset(SEED['customers'])
+    return jsonify(done=True)
+@app.get('/api/mode')
+def mode():return jsonify(mode='synthetic Flask' if DEMO_MODE else 'MySQL',reset=DEMO_MODE)
+if __name__=='__main__':app.run(host='127.0.0.1',port=int(os.getenv('PORT',5000)),debug=False)

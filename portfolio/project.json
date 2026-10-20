@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "project": {
+    "slug": "car-rental",
+    "title": "Car rental management",
+    "category": "Web application",
+    "repo": "data-representation-project",
+    "stack": [
+      "Python",
+      "Flask",
+      "MySQL",
+      "JavaScript"
+    ],
+    "image": "dashboard.jpg",
+    "alt": "Actual Fleetdesk dashboard with eight synthetic vehicles, six fictional customers and calculated example rates",
+    "desc": "A polished workspace for vehicle inventory and customer records, with a tested Flask API and an explicitly static public demonstration.",
+    "built": "Developed the original Flask/MySQL coursework into a practical record-management dashboard with a shared browser demonstration.",
+    "why": "Everyday record management depends on clear workflows and consistent data. This prototype brings the interface, API and storage responsibilities together.",
+    "how": [
+      "Browse synthetic vehicles and customers, with summaries calculated from current records.",
+      "Create, search, edit and delete records with clear validation, cancellation and confirmation.",
+      "Reset the sample workspace, or run the same frontend against the local Flask API and optional MySQL store."
+    ],
+    "demonstrates": "Full-stack development, REST endpoints, relational data access and translating a record-management requirement into a usable interface.",
+    "caption": "Genuine shared-frontend dashboard capture from the verified source revision. The public version runs in browser storage; the source also supports Flask and MySQL.",
+    "result": "Automated API, authentication, MySQL integration and browser workflow checks are required before a release package is published. The source-linked verification run records the actual result for this revision.",
+    "limits": "All public records are synthetic and stored in the browser. The demo does not run Flask/MySQL, create real rentals, process payments or model fleet availability. Customer vehicle references are descriptive records rather than enforced reservations. Multi-user concurrency and production access controls are outside this educational prototype.",
+    "technical": "One frontend uses a Flask REST adapter or a browser-storage adapter. Existing /cars and /customer routes and integer Price fields are preserved; Price is presented as a whole-euro example daily rate. The MySQL adapter uses bounded pooled connections, parameterized queries, rollback and cleanup. Writes reject duplicate references/pairs and cross-origin requests. Tests cover both adapters, reset, failures and mobile layout.",
+    "run": "Install requirements.txt, set DEMO_MODE=1 and run python CarServer.py. Open http://127.0.0.1:5000. See the README for MySQL configuration and opt-in disposable integration tests.",
+    "extra": "",
+    "gallery": [
+      [
+        "inventory.jpg",
+        "Vehicle inventory, search and record actions."
+      ],
+      [
+        "vehicle-form.jpg",
+        "A labelled vehicle form, sharing the integer-rate validation contract."
+      ],
+      [
+        "customers.jpg",
+        "Fictional customer records with vehicle references."
+      ],
+      [
+        "completed-action.jpg",
+        "A genuine completed update and success notification."
+      ]
+    ],
+    "demo": "",
+    "demo_disclosure": "Public demo: browser-managed synthetic data. The Flask/MySQL implementation is available separately in the source."
+  },
+  "assets": [
+    {
+      "name": "dashboard.jpg",
+      "path": "verification/screenshots/dashboard.jpg",
+      "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
+    },
+    {
+      "name": "inventory.jpg",
+      "path": "verification/screenshots/inventory.jpg",
+      "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
+    },
+    {
+      "name": "vehicle-form.jpg",
+      "path": "verification/screenshots/vehicle-form.jpg",
+      "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
+    },
+    {
+      "name": "customers.jpg",
+      "path": "verification/screenshots/customers.jpg",
+      "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
+    },
+    {
+      "name": "completed-action.jpg",
+      "path": "verification/screenshots/completed-action.jpg",
+      "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
+    },
+    {
+      "name": "mobile-dashboard.jpg",
+      "path": "verification/screenshots/mobile-dashboard.jpg",
+      "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
+    },
+    {
+      "name": "mobile-customers.jpg",
+      "path": "verification/screenshots/mobile-customers.jpg",
+      "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
+    }
+  ]
+}

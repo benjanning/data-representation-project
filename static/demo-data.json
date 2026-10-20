@@ -1,0 +1,90 @@
+{
+  "cars": [
+    {
+      "id": 1,
+      "Reg": "DEMO-001",
+      "Model": "Toyota Yaris \u00b7 Economy",
+      "Price": 39
+    },
+    {
+      "id": 2,
+      "Reg": "DEMO-002",
+      "Model": "Volkswagen Golf \u00b7 Compact",
+      "Price": 49
+    },
+    {
+      "id": 3,
+      "Reg": "DEMO-003",
+      "Model": "Skoda Octavia \u00b7 Estate",
+      "Price": 59
+    },
+    {
+      "id": 4,
+      "Reg": "DEMO-004",
+      "Model": "Hyundai Tucson \u00b7 SUV",
+      "Price": 72
+    },
+    {
+      "id": 5,
+      "Reg": "DEMO-005",
+      "Model": "Nissan Leaf \u00b7 Electric",
+      "Price": 54
+    },
+    {
+      "id": 6,
+      "Reg": "DEMO-006",
+      "Model": "BMW 3 Series \u00b7 Premium",
+      "Price": 95
+    },
+    {
+      "id": 7,
+      "Reg": "DEMO-007",
+      "Model": "Renault Clio \u00b7 Economy",
+      "Price": 37
+    },
+    {
+      "id": 8,
+      "Reg": "DEMO-008",
+      "Model": "Kia Sportage \u00b7 SUV",
+      "Price": 68
+    }
+  ],
+  "customers": [
+    {
+      "id": 1,
+      "Name": "Alex Sample",
+      "Reg": "DEMO-001",
+      "Price": 39
+    },
+    {
+      "id": 2,
+      "Name": "Morgan Example",
+      "Reg": "DEMO-002",
+      "Price": 49
+    },
+    {
+      "id": 3,
+      "Name": "Charlie Demo",
+      "Reg": "DEMO-003",
+      "Price": 59
+    },
+    {
+      "id": 4,
+      "Name": "Taylor Sample",
+      "Reg": "DEMO-004",
+      "Price": 72
+    },
+    {
+      "id": 5,
+      "Name": "Robin Example",
+      "Reg": "DEMO-005",
+      "Price": 54
+    },
+    {
+      "id": 6,
+      "Name": "Jordan Demo",
+      "Reg": "DEMO-006",
+      "Price": 95
+    }
+  ]
+}
