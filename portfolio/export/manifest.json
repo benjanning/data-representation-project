@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "source_repository": "benjanning/data-representation-project",
-  "source_revision": "2cd4db2b38b71836d3cfca36f0f707139721f70d",
-  "verification_run": 39393732515,
+  "source_revision": "edd62f12fa25073eeba4a3af3e5131e70e4446cf",
+  "verification_run": 39394701328,
   "project": {
     "slug": "car-rental",
     "title": "Car rental management",
@@ -25,8 +25,8 @@
       "Reset the sample workspace, or run the same frontend against the local Flask API and optional MySQL store."
     ],
     "demonstrates": "Full-stack development, REST endpoints, relational data access and translating a record-management requirement into a usable interface.",
-    "caption": "Genuine shared-frontend dashboard capture from the verified source revision. The public version runs in browser storage; the source also supports Flask and MySQL.",
-    "result": "Automated API, authentication, MySQL integration and browser workflow checks are required before a release package is published. The source-linked verification run records the actual result for this revision.",
+    "caption": "The verified Fleetdesk dashboard: eight synthetic vehicles, six fictional customers and a calculated €59 mean daily rate. This image is captured from the source revision shown below.",
+    "result": "13 API/authentication regression tests, an isolated MySQL 8.4 CRUD/authentication integration test, two frontend-rule tests and three browser workflow tests passed before this release. Browser checks cover both Flask and static modes, persistence, duplicates, cancellation, reset, simulated failure recovery and mobile layout. The linked run records the exact revision.",
     "limits": "All public records are synthetic and stored in the browser. The demo does not run Flask/MySQL, create real rentals, process payments or model fleet availability. Customer vehicle references are descriptive records rather than enforced reservations. Multi-user concurrency and production access controls are outside this educational prototype.",
     "technical": "One frontend uses a Flask REST adapter or a browser-storage adapter. Existing /cars and /customer routes and integer Price fields are preserved; Price is presented as a whole-euro example daily rate. The MySQL adapter uses bounded pooled connections, parameterized queries, rollback and cleanup. Writes reject duplicate references/pairs and cross-origin requests. Tests cover both adapters, reset, failures and mobile layout.",
     "run": "Install requirements.txt, set DEMO_MODE=1 and run python CarServer.py. Open http://127.0.0.1:5000. See the README for MySQL configuration and opt-in disposable integration tests.",
@@ -49,32 +49,32 @@
         "A genuine completed update and success notification."
       ]
     ],
-    "demo": "",
+    "demo": "https://benjanning.github.io/data-representation-project/",
     "demo_disclosure": "Public demo: browser-managed synthetic data. The Flask/MySQL implementation is available separately in the source."
   },
   "assets": [
     {
       "name": "dashboard.jpg",
-      "sha256": "a1f239ad7bc0acda68270d0a46a59a896933da82bbb186b470ddc1d7577416ac",
-      "bytes": 103710,
+      "sha256": "eabd365ca2d48bcb6a5a7d5fdd4ec3c41e69a9d821f00376b43980ff29455b8d",
+      "bytes": 103774,
       "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
     },
     {
       "name": "inventory.jpg",
-      "sha256": "e25e328b5d03c7a200fb35d834d94d97f69f07c3b696929b56f2a8888375a284",
-      "bytes": 96574,
+      "sha256": "ea1e0992e6b0b397a9edc3e3cc69f75532c7e4166566dc460decb238b23cd72d",
+      "bytes": 96580,
       "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
     },
     {
       "name": "vehicle-form.jpg",
-      "sha256": "8ab2c8735081625461331090b2af853395f297e946f15e0ed5e54698de9470d1",
-      "bytes": 68318,
+      "sha256": "e637d6544bfa960c0c690f6a7be170f3eb242a25953919f17c4d66d479e616ae",
+      "bytes": 69478,
       "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
     },
     {
       "name": "customers.jpg",
-      "sha256": "827329fe1c2638d0b365cea9e20e230b976fc0e57dc2367c576334c1da57d373",
-      "bytes": 96287,
+      "sha256": "3250f719109148e4ceb61103c59ec56ad93709241164b4d0f81ea0f4324b903e",
+      "bytes": 96338,
       "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
     },
     {
