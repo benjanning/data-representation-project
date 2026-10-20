@@ -1,0 +1,2 @@
+const {defineConfig}=require('@playwright/test');
+module.exports=defineConfig({testDir:'tests',testMatch:'*.spec.cjs',workers:1,retries:0,reporter:[['list'],['json',{outputFile:'verification/browser-results.json'}]],use:{viewport:{width:1440,height:1000},locale:'en-IE',reducedMotion:'reduce'},webServer:[{command:'python CarServer.py',url:'http://127.0.0.1:5000',env:{DEMO_MODE:'1'},reuseExistingServer:false},{command:'python -m http.server 8088 --bind 127.0.0.1 --directory docs',url:'http://127.0.0.1:8088',reuseExistingServer:false}]});

@@ -1,0 +1,95 @@
+name: Verified portfolio release
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: portfolio-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: disposable-ci-only
+          MYSQL_DATABASE: portfolio_integration
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pdisposable-ci-only"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m unittest discover -p 'test_*.py' -v
+      - name: Verify isolated MySQL CRUD and authentication
+        env:
+          RUN_MYSQL_TESTS: '1'
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_USER: root
+          DB_PASSWORD: disposable-ci-only
+          DB_NAME: portfolio_integration
+          DEMO_USERNAME: integration-user
+          DEMO_PASSWORD: disposable-app-only
+        run: python -m unittest test_mysql -v
+      - run: python scripts/build-demo.py
+      - run: npm ci
+      - run: npm run test:rules
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - uses: actions/configure-pages@v5
+        if: github.event_name != 'pull_request'
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: docs
+      - name: Export verified metadata and genuine visuals
+        if: github.event_name != 'pull_request'
+        run: python scripts/export_portfolio.py
+      - name: Publish the package on a normal recoverable branch
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git ls-remote --exit-code --heads origin portfolio-published >/dev/null; then
+            git fetch origin portfolio-published:refs/remotes/origin/portfolio-published
+            git switch -c portfolio-published origin/portfolio-published
+          else
+            git switch -c portfolio-published
+          fi
+          mkdir -p portfolio/export
+          cp -R "$RUNNER_TEMP/portfolio-package/." portfolio/export/
+          git add portfolio/export
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish verified portfolio evidence for $GITHUB_SHA"
+            git push origin HEAD:portfolio-published
+          fi
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the tested static demonstration
+        id: deployment
+        uses: actions/deploy-pages@v4
