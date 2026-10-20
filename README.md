@@ -6,7 +6,7 @@ A clear workspace for vehicle inventory and fictional customer records, develope
 
 **Python · Flask · REST API · MySQL · JavaScript**
 
-[Visual case study](https://benjanning.github.io/projects/projects/car-rental/) · [Portfolio](https://benjanning.github.io/projects/)
+**[Try the verified static demo →](https://benjanning.github.io/data-representation-project/)** · [Visual case study](https://benjanning.github.io/projects/projects/car-rental/) · [Portfolio](https://benjanning.github.io/projects/)
 
 ## What you can explore
 
@@ -53,7 +53,7 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-Thirteen local API/authentication regression tests pass; the live MySQL test is opt-in. The release workflow also runs MySQL 8.4 in an isolated CI service, verifies both browser adapters, captures deterministic screenshots and only then publishes evidence. Consult the linked workflow run for the actual database/browser result of a released revision. The browser failure test deliberately simulates a server outage; it does not claim an uncontrolled outage occurred.
+Thirteen API/authentication regression tests, two frontend-rule tests and three browser workflow tests pass. The opt-in MySQL CRUD/authentication test also passed against the isolated MySQL 8.4 CI service. No real database was used. The release workflow also runs MySQL 8.4 in an isolated CI service, verifies both browser adapters, captures deterministic screenshots and only then publishes evidence. Consult the linked workflow run for the actual database/browser result of a released revision. The browser failure test deliberately simulates a server outage; it does not claim an uncontrolled outage occurred.
 
 The opt-in MySQL test refuses any database name other than `portfolio_integration`. It creates two isolated tables, exercises both CRUD resources and authentication, and removes its synthetic test records. Run it only with RUN_MYSQL_TESTS=1 and disposable DB_* / DEMO_* configuration.
 

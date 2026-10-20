@@ -22,8 +22,8 @@
       "Reset the sample workspace, or run the same frontend against the local Flask API and optional MySQL store."
     ],
     "demonstrates": "Full-stack development, REST endpoints, relational data access and translating a record-management requirement into a usable interface.",
-    "caption": "Genuine shared-frontend dashboard capture from the verified source revision. The public version runs in browser storage; the source also supports Flask and MySQL.",
-    "result": "Automated API, authentication, MySQL integration and browser workflow checks are required before a release package is published. The source-linked verification run records the actual result for this revision.",
+    "caption": "The verified Fleetdesk dashboard: eight synthetic vehicles, six fictional customers and a calculated €59 mean daily rate. This image is captured from the source revision shown below.",
+    "result": "13 API/authentication regression tests, an isolated MySQL 8.4 CRUD/authentication integration test, two frontend-rule tests and three browser workflow tests passed before this release. Browser checks cover both Flask and static modes, persistence, duplicates, cancellation, reset, simulated failure recovery and mobile layout. The linked run records the exact revision.",
     "limits": "All public records are synthetic and stored in the browser. The demo does not run Flask/MySQL, create real rentals, process payments or model fleet availability. Customer vehicle references are descriptive records rather than enforced reservations. Multi-user concurrency and production access controls are outside this educational prototype.",
     "technical": "One frontend uses a Flask REST adapter or a browser-storage adapter. Existing /cars and /customer routes and integer Price fields are preserved; Price is presented as a whole-euro example daily rate. The MySQL adapter uses bounded pooled connections, parameterized queries, rollback and cleanup. Writes reject duplicate references/pairs and cross-origin requests. Tests cover both adapters, reset, failures and mobile layout.",
     "run": "Install requirements.txt, set DEMO_MODE=1 and run python CarServer.py. Open http://127.0.0.1:5000. See the README for MySQL configuration and opt-in disposable integration tests.",
@@ -46,7 +46,7 @@
         "A genuine completed update and success notification."
       ]
     ],
-    "demo": "",
+    "demo": "https://benjanning.github.io/data-representation-project/",
     "demo_disclosure": "Public demo: browser-managed synthetic data. The Flask/MySQL implementation is available separately in the source."
   },
   "assets": [
