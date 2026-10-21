@@ -21,6 +21,8 @@ class AuthenticationTests(unittest.TestCase):
         client = module.app.test_client()
         self.assertEqual(client.get('/cars').status_code, 401)
         self.assertEqual(client.get('/customer').status_code, 401)
+        self.assertEqual(client.get('/api/reservations').status_code, 401)
+        self.assertEqual(client.post('/api/reservations',json={}).status_code, 401)
         credential = base64.b64encode(b'test-user:test-only').decode()
         self.assertEqual(client.get('/cars', headers={'Authorization': 'Basic ' + credential}).status_code, 200)
 

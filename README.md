@@ -1,51 +1,51 @@
-# Fleetdesk · Car rental management
+# Fleetdesk / rental management
 
-A clear workspace for vehicle inventory and fictional customer records, developed from the original Flask/MySQL coursework.
+Allocate a synthetic vehicle to a customer for a date range, review a quotation and follow the reservation through cancellation or completion.
 
-![Actual Fleetdesk dashboard with synthetic records](assets/dashboard.jpg)
+![Latest verified release: genuine rental quotation](https://raw.githubusercontent.com/benjanning/data-representation-project/portfolio-published/portfolio/export/assets/rental-quote.jpg)
 
-**Python · Flask · REST API · MySQL · JavaScript**
+**Python · Flask · REST APIs · MySQL · JavaScript · Transactional business rules**
 
-**[Try the verified static demo →](https://benjanning.github.io/data-representation-project/)** · [Visual case study](https://benjanning.github.io/projects/projects/car-rental/) · [Portfolio](https://benjanning.github.io/projects/)
+**[Try the public demonstration →](https://benjanning.github.io/data-representation-project/)** · [Visual case study](https://benjanning.github.io/projects/projects/car-rental/) · [Portfolio](https://benjanning.github.io/projects/)
 
-## What you can explore
+The public version stores fictional records in your browser. The same frontend also runs against the local Flask API and optional MySQL store. No actual fleet, rental, payment or customer account is managed.
 
-- Dashboard summaries calculated from eight sample vehicles and six fictional customers.
-- Searchable vehicle and customer records, labelled editing forms and clear success/error feedback.
-- Create, update, cancel and delete with confirmation; restore the sample workspace at any time.
-- A shared frontend for the Flask API and a clearly labelled browser-storage demonstration.
+## The problem and approach
 
-No real rentals, payments or customer information. Customer vehicle references describe sample records; they do not create reservations or represent availability. The public static version does not run Flask or MySQL.
+Editing vehicle records is useful, but a rental application also has to answer: is this particular vehicle available, what price did the customer review, and can two people allocate it at the same time?
 
-## Run the Flask demonstration
+The extension keeps the original vehicle/customer CRUD and adds a separate reservation model. Availability is checked again when the allocation is written. Prices and names are saved as snapshots, and request IDs make a lost-response retry safe.
 
-```powershell
-python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements.txt
-$env:DEMO_MODE="1"
-.venv/Scripts/python CarServer.py
+## A two-minute example
+
+1. Open **Reservations → New reservation**. Choose a fictional customer and a vehicle.
+2. Choose collection/return dates and review the calculated quotation. A three-day €68 rental totals €204.
+3. Confirm. Try the same vehicle and overlapping dates again: the application refuses the conflict.
+4. Cancel to release the allocation. Complete a **Return due** example to see preserved history. **Reset demo data** restores the original workspace.
+
+![Latest verified reservation list](https://raw.githubusercontent.com/benjanning/data-representation-project/portfolio-published/portfolio/export/assets/reservations.jpg)
+
+The dashboard derives its figures from actual sample records: availability for the chosen period, active/upcoming/return-due counts and the total of confirmed example quotations. The latter is explicitly not revenue. Existing inventory/customer search and editing remain available.
+
+## The engineering challenge
+
+A quote can become stale before confirmation. Memory writes use a shared lock; browser writes serialize across tabs with Web Locks; MySQL locks the vehicle row within the same transaction as the overlap check and insert. Foreign keys protect references, and identical retries return the original reservation.
+
+Python and JavaScript follow a deterministic 27-case contract covering calendar validation, overlapping/adjacent periods, money and status rules. Tests also simulate a server commit followed by a lost response, and two tabs trying to allocate the same vehicle. See [reservation design and architecture](RESERVATION-DESIGN.md) for the rules, API, calculations and trade-offs.
+
+## Run and verify
+
+```bash
+python -m pip install -r requirements.txt
+# Set DEMO_MODE=1 in your shell, then:
+python CarServer.py
 ```
 
-Open http://127.0.0.1:5000. On macOS/Linux, use your virtual environment's Python with `DEMO_MODE=1 python CarServer.py`. The server binds to loopback. Demo data is temporary and resets on restart or through **Reset demo data**.
-
-## Screens from the application
-
-| Inventory | Record form |
-| --- | --- |
-| ![Actual vehicle inventory](assets/inventory.jpg) | ![Actual vehicle form](assets/vehicle-form.jpg) |
-| Customer directory | Completed action |
-| ![Fictional customers](assets/customers.jpg) | ![Genuine update notification](assets/completed-action.jpg) |
-
-## Architecture and data contract
-
-The original `/cars` and `/customer` CRUD endpoints, identifiers and storage fields are preserved. `Price` is an integer whole-euro **example daily rate** in the refined demonstration; historical coursework used different example values. Categories are descriptive suffixes in the existing Model field, not a new database column. The synthetic dataset is shared by Python and the browser adapter.
-
-The MySQL data layer uses lazy bounded pools, parameterized queries, transactions, rollback and connection cleanup. Set DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DEMO_USERNAME and DEMO_PASSWORD with DEMO_MODE unset. Authentication protects database API access; cross-origin writes are rejected. Schema initialization is explicit. Use a disposable database, never real customer records. This is an educational prototype, without production tenancy or concurrency guarantees.
-
-## Verify and reproduce visuals
+Open http://127.0.0.1:5000. Dates use UTC. Collection is included and return excluded, allowing same-day handovers. Reservations last 1–365 days. Completion is allowed on/after the scheduled return date; early-return pricing and amendments are outside this prototype.
 
 ```bash
 python -m unittest discover -p "test_*.py" -v
+python scripts/build-rental-fixtures.py --check
 python scripts/build-demo.py
 npm ci
 npm run test:rules
@@ -53,10 +53,22 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-Thirteen API/authentication regression tests, two frontend-rule tests and three browser workflow tests pass. The opt-in MySQL CRUD/authentication test also passed against the isolated MySQL 8.4 CI service. No real database was used. The release workflow also runs MySQL 8.4 in an isolated CI service, verifies both browser adapters, captures deterministic screenshots and only then publishes evidence. Consult the linked workflow run for the actual database/browser result of a released revision. The browser failure test deliberately simulates a server outage; it does not claim an uncontrolled outage occurred.
+The default Python run skips the two opt-in live database checks. Source CI runs those against a fresh, explicitly named `portfolio_integration` MySQL 8.4 database before releasing. Browser tests start their own Flask/static servers and capture genuine desktop/mobile screens only after meaningful workflows pass. The exported manifest identifies the exact source commit, successful run and image hashes.
 
-The opt-in MySQL test refuses any database name other than `portfolio_integration`. It creates two isolated tables, exercises both CRUD resources and authentication, and removes its synthetic test records. Run it only with RUN_MYSQL_TESTS=1 and disposable DB_* / DEMO_* configuration.
+## Optional MySQL
 
-`docs/` is generated from the shared frontend. The release workflow builds and deploys the tested static version, then makes source-identified metadata and genuine screenshots available for the central portfolio's review-PR synchronisation. No cross-repository write credential is used.
+Use a disposable local MySQL 8.4/InnoDB database. Set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DEMO_USERNAME` and `DEMO_PASSWORD` in your process environment. With `DEMO_MODE` unset or `0`, API access requires the configured Basic credentials. Never use real records or reuse production credentials.
 
-[Historical coursework documentation](COURSEWORK.md) · [Visual provenance](assets/PROVENANCE.md) · [Release checks](https://github.com/benjanning/data-representation-project/actions/workflows/portfolio-release.yml)
+For a fresh schema, `python createDatabase.py` creates missing tables and seeds vehicle/customer tables only when empty. For an existing V3 schema, run `python migrate_reservations.py`: it adds the reservation table without replacing, dropping or reseeding records. The existing `cars` and `customer` tables must use compatible integer primary keys and InnoDB. MySQL starts with no reservation history; the three relative-date sample reservations belong to the disposable synthetic modes.
+
+The integration test refuses any database name except `portfolio_integration`. See the release workflow for the isolated service and required test environment. It verifies actual database allocation contention, immutable quotes, referential integrity, retries and lifecycle transitions.
+
+## Scope and preservation
+
+The browser demo coordinates tabs within one origin/browser profile, not different devices. A browser supporting Web Locks is required for safe local mutations. Existing V3 browser record edits are imported with an empty reservation history; reset deliberately restores the new samples. A corrupted saved workspace is reported and restored to samples.
+
+Original `/cars` and `/customer` routes and integer `Price` fields are preserved. Customer vehicle-reference/rate fields remain historical descriptive fields; new reservations reference actual vehicle/customer IDs. Cancellation and completion retain saved history, and referenced records cannot be deleted. Original frontend and coursework remain in `static/legacy`, [COURSEWORK.md](COURSEWORK.md) and Git history.
+
+This prototype has no production identity system, cross-device public backend, actual stock operation, tax/deposit accounting or payment handling. The practical evidence is the implemented code, repeatable tests, genuine captures and explicit design decisions.
+
+[Visual provenance](assets/PROVENANCE.md) · [Latest verified export receipt](https://github.com/benjanning/data-representation-project/blob/portfolio-published/portfolio/export/manifest.json)

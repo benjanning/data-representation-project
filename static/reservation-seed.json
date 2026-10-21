@@ -1,0 +1,5 @@
+[
+  {"vehicle_id":1,"customer_id":1,"start_offset":-2,"end_offset":2},
+  {"vehicle_id":2,"customer_id":2,"start_offset":5,"end_offset":8},
+  {"vehicle_id":3,"customer_id":3,"start_offset":-5,"end_offset":-2}
+]

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": {
     "slug": "car-rental",
-    "title": "Car rental management",
+    "title": "Fleetdesk rental management",
     "category": "Web application",
     "repo": "data-representation-project",
     "stack": [
@@ -11,43 +11,44 @@
       "MySQL",
       "JavaScript"
     ],
-    "image": "dashboard.jpg",
-    "alt": "Actual Fleetdesk dashboard with eight synthetic vehicles, six fictional customers and calculated example rates",
-    "desc": "A polished workspace for vehicle inventory and customer records, with a tested Flask API and an explicitly static public demonstration.",
-    "built": "Developed the original Flask/MySQL coursework into a practical record-management dashboard with a shared browser demonstration.",
-    "why": "Everyday record management depends on clear workflows and consistent data. This prototype brings the interface, API and storage responsibilities together.",
+    "image": "rental-quote.jpg",
+    "alt": "Actual Fleetdesk quotation for a synthetic three-day rental with a saved 204 euro example total",
+    "desc": "Quote a rental, allocate an available vehicle and manage demonstration reservations with tested date, pricing and concurrency rules.",
+    "built": "Extended the original vehicle/customer application with genuine synthetic reservations, advisory availability, quotation snapshots, cancellation and completion while preserving its existing REST contracts.",
+    "why": "A rental workspace must prevent two customers from being promised the same vehicle for overlapping dates, and keep the reviewed price clear when records change.",
     "how": [
-      "Browse synthetic vehicles and customers, with summaries calculated from current records.",
-      "Create, search, edit and delete records with clear validation, cancellation and confirmation.",
-      "Reset the sample workspace, or run the same frontend against the local Flask API and optional MySQL store."
+      "Choose an existing customer, a vehicle and a UTC collection/return period, then review the calculated quote.",
+      "Confirm an allocation with overlap and current-rate checks; retry safely if a response is lost.",
+      "Track active, upcoming and return-due reservations, cancel allocations or complete due rentals, and inspect calculated availability."
     ],
     "demonstrates": "Full-stack development, REST endpoints, relational data access and translating a record-management requirement into a usable interface.",
-    "caption": "The verified Fleetdesk dashboard: eight synthetic vehicles, six fictional customers and a calculated €59 mean daily rate. This image is captured from the source revision shown below.",
-    "result": "13 API/authentication regression tests, an isolated MySQL 8.4 CRUD/authentication integration test, two frontend-rule tests and three browser workflow tests passed before this release. Browser checks cover both Flask and static modes, persistence, duplicates, cancellation, reset, simulated failure recovery and mobile layout. The linked run records the exact revision.",
-    "limits": "All public records are synthetic and stored in the browser. The demo does not run Flask/MySQL, create real rentals, process payments or model fleet availability. Customer vehicle references are descriptive records rather than enforced reservations. Multi-user concurrency and production access controls are outside this educational prototype.",
-    "technical": "One frontend uses a Flask REST adapter or a browser-storage adapter. Existing /cars and /customer routes and integer Price fields are preserved; Price is presented as a whole-euro example daily rate. The MySQL adapter uses bounded pooled connections, parameterized queries, rollback and cleanup. Writes reject duplicate references/pairs and cross-origin requests. Tests cover both adapters, reset, failures and mobile layout.",
-    "run": "Install requirements.txt, set DEMO_MODE=1 and run python CarServer.py. Open http://127.0.0.1:5000. See the README for MySQL configuration and opt-in disposable integration tests.",
+    "caption": "Genuine shared-frontend quotation: three days at €68 per day gives €204. Confirmation rechecks both rate and allocation. Synthetic records; no actual rental or payment.",
+    "result": "Existing record workflows and new rental workflows pass API/domain, browser-rule and full browser checks before this release. The isolated MySQL integration verifies simultaneous overlap rejection, retry identity, saved prices, referential integrity and state transitions. Desktop/mobile captures match this exact source revision; the linked run records its actual result.",
+    "limits": "Synthetic educational application, with no real fleet, payments, tax/deposit calculation or deployed multi-user backend. The public demo is local to one browser profile and uses Web Locks to coordinate its tabs; it cannot allocate across devices. UTC dates use an exclusive return date. Early-return pricing, rental amendments and deletion of referenced history are outside scope. MySQL allocation safety assumes writes use the transactional service.",
+    "technical": "Separate pure rental rules, memory/MySQL adapters and a presentation module preserve original CRUD routes. Python and JavaScript follow a 27-case rules contract. Memory uses a shared RLock; browser writes use an exclusive Web Lock and fresh storage read; MySQL confirmation locks the vehicle/customer rows in a transaction and preserves references with foreign keys. Request IDs prevent duplicate creation after a lost response. Integer-cent rate and name snapshots preserve quoted terms; stale rates require a new quote.",
+    "run": "Install requirements.txt; set DEMO_MODE=1 and run python CarServer.py. The README documents the non-destructive MySQL reservation migration and opt-in isolated integration checks. The public static demo shares its frontend and tested rules contract.",
     "extra": "",
     "gallery": [
       [
+        "rental-dashboard.jpg",
+        "Calculated availability for a selected period, with active, upcoming and return-due counts."
+      ],
+      [
+        "reservations.jpg",
+        "Actual reservation snapshots, lifecycle actions and an accurate saved example price."
+      ],
+      [
+        "mobile-rental-quote.jpg",
+        "The real mobile rental form, with a scrollable quotation and confirmation controls."
+      ],
+      [
         "inventory.jpg",
-        "Vehicle inventory, search and record actions."
-      ],
-      [
-        "vehicle-form.jpg",
-        "A labelled vehicle form, sharing the integer-rate validation contract."
-      ],
-      [
-        "customers.jpg",
-        "Fictional customer records with vehicle references."
-      ],
-      [
-        "completed-action.jpg",
-        "A genuine completed update and success notification."
+        "Original inventory and customer editing remain available."
       ]
     ],
     "demo": "https://benjanning.github.io/data-representation-project/",
-    "demo_disclosure": "Public demo: browser-managed synthetic data. The Flask/MySQL implementation is available separately in the source."
+    "demo_disclosure": "Public demo: browser-managed synthetic data. The Flask/MySQL implementation is available separately in the source.",
+    "challenge": "Availability can change between viewing a quote and confirming it. The solution rechecks at the write boundary: a process lock, a browser Web Lock or a MySQL transaction serializes competing allocations. A concurrent test must produce one successful reservation and one conflict, while an identical retry returns the original record."
   },
   "assets": [
     {
@@ -84,6 +85,26 @@
       "name": "mobile-customers.jpg",
       "path": "verification/screenshots/mobile-customers.jpg",
       "provenance": "Genuine shared-frontend browser capture after successful CRUD/reset/error checks, from this source revision. Synthetic records; original CSS/SVG visuals."
+    },
+    {
+      "name": "rental-quote.jpg",
+      "path": "verification/screenshots/rental-quote.jpg",
+      "provenance": "Genuine shared-frontend capture after both Flask/static reservation and record journeys, overlap/rate/retry checks, cross-tab allocation and mobile checks. Synthetic records and UTC-relative sample dates. No real bookings or payments."
+    },
+    {
+      "name": "rental-dashboard.jpg",
+      "path": "verification/screenshots/rental-dashboard.jpg",
+      "provenance": "Genuine shared-frontend capture after both Flask/static reservation and record journeys, overlap/rate/retry checks, cross-tab allocation and mobile checks. Synthetic records and UTC-relative sample dates. No real bookings or payments."
+    },
+    {
+      "name": "reservations.jpg",
+      "path": "verification/screenshots/reservations.jpg",
+      "provenance": "Genuine shared-frontend capture after both Flask/static reservation and record journeys, overlap/rate/retry checks, cross-tab allocation and mobile checks. Synthetic records and UTC-relative sample dates. No real bookings or payments."
+    },
+    {
+      "name": "mobile-rental-quote.jpg",
+      "path": "verification/screenshots/mobile-rental-quote.jpg",
+      "provenance": "Genuine shared-frontend capture after both Flask/static reservation and record journeys, overlap/rate/retry checks, cross-tab allocation and mobile checks. Synthetic records and UTC-relative sample dates. No real bookings or payments."
     }
   ]
 }

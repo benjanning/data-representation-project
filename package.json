@@ -1,1 +1,11 @@
-{"name":"fleetdesk-portfolio-verification","private":true,"scripts":{"test:browser":"playwright test","test:rules":"node --test tests/rules.test.cjs"},"devDependencies":{"@playwright/test":"1.56.1"}}
+{
+  "name": "fleetdesk-portfolio-verification",
+  "private": true,
+  "scripts": {
+    "test:browser": "playwright test",
+    "test:rules": "node --test tests/rules.test.cjs tests/rentals.test.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}
