@@ -184,3 +184,48 @@ test("server retry after a lost create response does not allocate twice", async 
   await expect(page.locator("#rental-editor")).not.toBeVisible();
   await expect(page.locator(".reservation-card")).toHaveCount(4);
 });
+
+test("empty imported workspace explains the required records", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "fleetdesk-v3",
+      JSON.stringify({ cars: [], customers: [] }),
+    ),
+  );
+  await page.goto("http://127.0.0.1:8088/#reservations");
+  await page
+    .getByRole("button", { name: "＋ New reservation", exact: true })
+    .click();
+  await expect(page.locator("#notice")).toContainText(
+    "Add the missing records first",
+  );
+  await expect(page.locator("#rental-editor")).not.toBeVisible();
+});
+
+test("pending quote locks the selection and restores editable controls", async ({
+  page,
+}) => {
+  await page.goto("http://127.0.0.1:5000/#reservations");
+  await reset(page);
+  await page
+    .getByRole("button", { name: "＋ New reservation", exact: true })
+    .click();
+  await page.getByLabel("Customer", { exact: true }).selectOption("4");
+  await page.getByLabel("Vehicle", { exact: true }).selectOption("8");
+  await page.locator("#rental-start").fill(day(10));
+  await page.locator("#rental-end").fill(day(13));
+  let release;
+  const gate = new Promise((resolve) => (release = resolve));
+  await page.route("**/api/reservations/quote", async (route) => {
+    await gate;
+    await route.continue();
+  });
+  await page.locator("#quote-rental").click();
+  await expect(page.getByLabel("Customer", { exact: true })).toBeDisabled();
+  await expect(page.locator("#rental-start")).toBeDisabled();
+  release();
+  await expect(page.locator("#rental-quote")).toContainText("€204.00");
+  await expect(page.getByLabel("Customer", { exact: true })).toBeEnabled();
+});

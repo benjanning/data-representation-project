@@ -81,6 +81,13 @@
       }
       function open() {
         const d = ctx.getData();
+        if (!d.cars.length || !d.customers.length) {
+          ctx.notify(
+            "Reservations need at least one vehicle and one customer. Add the missing records first.",
+            true,
+          );
+          return;
+        }
         form.reset();
         clearQuote();
         $("#rental-error").hidden = true;
@@ -118,6 +125,8 @@
       }
       function working(value) {
         busy = value;
+        for (const field of form.querySelectorAll("input, select"))
+          field.disabled = value;
         $("#quote-rental").disabled = value;
         $("#confirm-rental").disabled = value;
         form.setAttribute("aria-busy", String(value));
