@@ -1,0 +1,347 @@
+.rental-overview {
+  margin: 24px 0;
+  padding: 26px;
+}
+.rental-overview .panel-heading {
+  padding: 0;
+  margin-bottom: 22px;
+}
+.period-picker {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.period-picker label {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  color: #456451;
+}
+.period-picker input {
+  font: inherit;
+  background: #fff;
+  border: 1px solid #c9d3c7;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 44px;
+}
+.rental-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  padding: 25px 0;
+}
+.rental-metrics article {
+  border-left: 1px solid #d9e0d3;
+  padding: 0 18px;
+}
+.rental-metrics article:first-child {
+  border: 0;
+  padding-left: 0;
+}
+.rental-metrics span {
+  font-size: 12px;
+  display: block;
+  color: #5d6f64;
+}
+.rental-metrics strong {
+  display: block;
+  font:
+    36px Georgia,
+    serif;
+  margin-top: 10px;
+}
+.rental-metrics strong small {
+  font: 16px system-ui;
+  color: #718276;
+}
+.rental-value {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  background: #eef3e9;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.rental-value strong {
+  margin-left: 8px;
+}
+.rental-value a {
+  color: #28553e;
+}
+.rental-overview .fine {
+  margin-top: 15px;
+  line-height: 1.7;
+}
+.rental-guide {
+  padding: 22px;
+  margin: 24px 0;
+  background: #f0f4e9;
+}
+.rental-guide strong {
+  font:
+    22px Georgia,
+    serif;
+}
+.rental-guide p {
+  font-size: 13px;
+  line-height: 1.8;
+  max-width: 760px;
+}
+.rental-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+.rental-filters button {
+  border: 1px solid #ccd6c7;
+  background: transparent;
+  color: #31533d;
+  border-radius: 24px;
+  font: 12px system-ui;
+  padding: 11px 15px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.rental-filters button[aria-pressed="true"] {
+  background: #28543e;
+  color: #fff;
+  border-color: #28543e;
+}
+.reservation-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.reservation-card {
+  padding: 26px;
+}
+.reservation-top {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+.reservation-status {
+  font-size: 11px;
+  background: #eff2ea;
+  color: #405d45;
+  padding: 7px 10px;
+  border-radius: 20px;
+}
+.reservation-status.active {
+  background: #e0eedf;
+}
+.reservation-status.due {
+  background: #f8eacf;
+  color: #775118;
+}
+.reservation-status.cancelled {
+  background: #f1e6e2;
+  color: #775042;
+}
+.reservation-card h2 {
+  font:
+    27px Georgia,
+    serif;
+  margin: 22px 0 10px;
+}
+.reservation-card > p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.reservation-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin: 24px 0;
+}
+.reservation-details dt {
+  font-size: 11px;
+  color: #6b796d;
+  margin-bottom: 6px;
+}
+.reservation-details dd {
+  margin: 0;
+  font-size: 14px;
+}
+.reservation-details small {
+  display: block;
+  font-size: 11px;
+  margin-top: 6px;
+  color: #6b796d;
+}
+.reservation-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.reservation-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.reservation-card .fine {
+  font-size: 11px;
+}
+.rental-date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+#rental-editor {
+  width: min(690px, calc(100% - 24px));
+  box-sizing: border-box;
+  max-height: 92vh;
+  overflow: auto;
+}
+#rental-form select {
+  display: block;
+  width: 100%;
+  font: 14px system-ui;
+  border: 1px solid #cad4c7;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+  color: #2a4935;
+  min-height: 46px;
+}
+#rental-form label {
+  display: block;
+  margin: 15px 0 7px;
+  font-size: 12px;
+}
+.rental-quote {
+  background: #edf3e7;
+  border: 1px solid #c7d7bf;
+  border-radius: 10px;
+  padding: 22px;
+  margin-top: 22px;
+}
+.rental-quote h3 {
+  font:
+    24px Georgia,
+    serif;
+  margin: 12px 0;
+}
+.rental-quote p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.rental-quote strong {
+  display: block;
+  font:
+    32px Georgia,
+    serif;
+  margin: 14px 0;
+}
+.rental-quote small {
+  font-size: 11px;
+  line-height: 1.6;
+}
+.rental-form-actions {
+  flex-wrap: wrap;
+}
+.rental-form-actions button {
+  min-height: 46px;
+}
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid #b78b3a;
+  outline-offset: 3px;
+}
+.rental-quote[hidden],
+#confirm-rental[hidden] {
+  display: none;
+}
+@media (max-width: 1000px) {
+  .reservation-list {
+    grid-template-columns: 1fr;
+  }
+  .rental-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .rental-metrics article:nth-child(3) {
+    border: 0;
+    padding-left: 0;
+  }
+}
+@media (max-width: 600px) {
+  .rental-overview,
+  .reservation-card {
+    padding: 20px;
+  }
+  .rental-overview .panel-heading {
+    display: block;
+  }
+  .rental-overview .panel-heading button {
+    margin-top: 15px;
+  }
+  .period-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .period-picker input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .period-picker button {
+    grid-column: 1/-1;
+  }
+  .rental-value {
+    display: block;
+    line-height: 1.8;
+  }
+  .rental-value a {
+    display: block;
+    margin-top: 10px;
+  }
+  .reservation-top {
+    align-items: start;
+  }
+  .reservation-details {
+    gap: 16px;
+  }
+  .rental-date-grid {
+    grid-template-columns: 1fr;
+  }
+  .rental-form-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  #rental-editor {
+    padding: 20px;
+  }
+  .rental-quote {
+    padding: 18px;
+  }
+  .rental-filters {
+    gap: 6px;
+  }
+  .rental-filters button {
+    padding: 10px;
+  }
+  .reservation-actions button {
+    width: 100%;
+  }
+}
+@media (max-width: 760px) {
+  nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  nav a {
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px;
+    justify-content: flex-start;
+  }
+}

@@ -13,6 +13,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       mysql:
         image: mysql:8.4
@@ -45,12 +46,19 @@ jobs:
           DB_NAME: portfolio_integration
           DEMO_USERNAME: integration-user
           DEMO_PASSWORD: disposable-app-only
-        run: python -m unittest test_mysql -v
+        run: python -m unittest test_mysql test_rental_mysql -v
+      - run: python scripts/build-rental-fixtures.py --check
       - run: python scripts/build-demo.py
       - run: npm ci
       - run: npm run test:rules
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fleetdesk-browser-evidence
+          path: verification
+          retention-days: 14
       - uses: actions/configure-pages@v5
         if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v3

@@ -41,5 +41,7 @@ for table, columns, rows in [
     if cursor.fetchone()[0] == 0:
         cursor.executemany(f"INSERT INTO {table} ({columns}) VALUES (%s, %s, %s)", rows)
 db.commit()
+from rental_mysql import migrate
+migrate(db)
 cursor.close()
 db.close()

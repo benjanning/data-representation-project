@@ -1,34 +1,479 @@
 /* One frontend for the Flask API and the explicitly browser-only demonstration. */
-(()=>{'use strict';
-const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money=v=>new Intl.NumberFormat('en-IE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v);
-const server=document.body.dataset.mode==='server', key='fleetdesk-v3', labels={cars:'Model',customers:'Name'};
-let data={cars:[],customers:[]}, seed, pending=false, confirmAction=null, query='';
-const content=$('#content'),editor=$('#editor'),confirm=$('#confirm');
-function notify(text,bad=false){$('#notice').hidden=false;$('#notice').textContent=text;$('#notice').classList.toggle('bad',bad);}
-async function api(path,method='GET',body){let response;try{response=await fetch(path,{method,headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});}catch{throw Error('The server could not be reached. Your form is preserved; try again.');}let result;try{result=await response.json();}catch{throw Error('The server returned an unexpected response. Please refresh and try again.');}if(!response.ok)throw Error(result.error||'This action could not be completed.');return result;}
-function persist(next){try{localStorage.setItem(key,JSON.stringify(next));}catch{throw Error('Browser storage is unavailable or full. Allow local storage for this demo, then try again.');}data=next;}
-async function load(){
- if(server){const [cars,customers,mode]=await Promise.all([api('./cars'),api('./customer'),api('./api/mode')]);data={cars,customers};$('#mode').textContent=mode.mode==='MySQL'?'Local MySQL mode · Use disposable records':'Local Flask demo · Synthetic records';$('#reset').hidden=!mode.reset;}
- else {seed=await api('./demo-data.json');let saved;try{saved=JSON.parse(localStorage.getItem(key)||'null');if(saved){for(let kind of ['cars','customers']){if(!Array.isArray(saved[kind]))throw Error();const ids=new Set();for(let row of saved[kind]){FleetRules.validate(row,labels[kind]);if(!Number.isSafeInteger(row.id)||row.id<1||ids.has(row.id))throw Error();ids.add(row.id);}}data=saved;}else data=structuredClone(seed);}catch{data=structuredClone(seed);notify('Saved demo data was unreadable. The sample workspace has been restored.',true);}$('#mode').textContent='Interactive static demo · Browser storage only · No Flask/MySQL';}
-}
-const carGlyph='<svg viewBox="0 0 110 50" aria-hidden="true"><path d="M9 31h6l11-15h43l16 15h14v10H9zM31 20l-8 11h49L62 20z" fill="currentColor"/><circle cx="28" cy="41" r="7" fill="#f2f5ee" stroke="currentColor" stroke-width="4"/><circle cx="81" cy="41" r="7" fill="#f2f5ee" stroke="currentColor" stroke-width="4"/></svg>';
-function actions(kind,row){return `<div class="row-actions"><button type="button" data-edit="${kind}" data-id="${row.id}" aria-label="Edit ${esc(kind==='cars'?row.Reg:row.Name)}">Edit</button><button type="button" data-delete="${kind}" data-id="${row.id}" aria-label="Delete ${esc(kind==='cars'?row.Reg:row.Name)}">Delete</button></div>`;}
-function table(kind,rows,small=false){if(!rows.length)return `<div class="empty"><span>↗</span><h3>${query?'No matching records.':'A little room to get started.'}</h3><p>${query?'Try a different name, reference or model.':'Add your first synthetic '+(kind==='cars'?'vehicle':'customer')+' to this workspace.'}</p>${!query?`<button class="primary" type="button" data-add="${kind}">Add ${kind==='cars'?'vehicle':'customer'} →</button>`:''}</div>`;return `<div class="table-wrap"><table><thead><tr><th scope="col">${kind==='cars'?'Vehicle / model':'Customer / sample name'}</th><th scope="col">Vehicle reference</th><th scope="col">Daily rate</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows.map((row,i)=>`<tr><td><div class="record-title">${kind==='cars'?`<span class="car-icon tone-${i%3}">${carGlyph}</span>`:`<span class="initials">${esc(row.Name.split(' ').map(n=>n[0]).slice(0,2).join(''))}</span>`}<div><strong>${esc(kind==='cars'?row.Model.split(' · ')[0]:row.Name)}</strong><small>${kind==='cars'?esc(row.Model.split(' · ')[1]||'Example vehicle'):'Fictional customer · #'+String(row.id).padStart(3,'0')}</small></div></div></td><td><span class="reg">${esc(row.Reg)}</span></td><td><strong>${money(row.Price)}</strong><small class="rate-unit"> / day</small></td><td>${small?'<a class="quiet-link" href="#'+(kind==='cars'?'vehicles':'customers')+'">View →</a>':actions(kind,row)}</td></tr>`).join('')}</tbody></table></div>`;}
-function header(title,copy,kind){return `<div class="page-heading"><div><span class="eyebrow">YOUR WORKSPACE, AT A GLANCE</span><h1>${title}</h1><p>${copy}</p></div><button type="button" class="primary" data-add="${kind}">＋ Add ${kind==='cars'?'vehicle':'customer'}</button></div>`;}
-function render(){let page=location.hash.slice(1)||'dashboard';if(!['dashboard','vehicles','customers'].includes(page))page='dashboard';document.querySelectorAll('nav a').forEach(a=>a.setAttribute('aria-current',a.hash==='#'+page?'page':'false'));$('#vehicle-count').textContent=data.cars.length;$('#customer-count').textContent=data.customers.length;content.setAttribute('aria-busy','false');
- if(page==='dashboard'){let mean=data.cars.length?Math.round(data.cars.reduce((s,r)=>s+r.Price,0)/data.cars.length):0, cats={};data.cars.forEach(r=>{let category=r.Model.split(' · ')[1]||'Other';cats[category]=(cats[category]||0)+1;});content.innerHTML=header('A clearer view of your fleet.','A practical workspace for vehicles, people and the details that connect them.','cars')+`<section class="metrics" aria-label="Calculated workspace summary"><article><span>Vehicles in inventory</span><strong>${data.cars.length.toString().padStart(2,'0')}</strong><small>Example vehicle records</small></article><article><span>Customer records</span><strong>${data.customers.length.toString().padStart(2,'0')}</strong><small>Entirely fictional people</small></article><article><span>Average daily rate</span><strong>${money(mean)}</strong><small>Mean across current vehicles</small></article></section><div class="dashboard-grid"><section class="panel fleet-panel"><div class="panel-heading"><div><h2>Your fleet, in focus.</h2><p>A few examples from your inventory.</p></div><a href="#vehicles">View all vehicles ↗</a></div>${table('cars',data.cars.slice(0,4),true)}</section><section class="panel fleet-mix"><span class="eyebrow">FLEET COMPOSITION</span><h2>A balanced collection.</h2><p>Categories from the current model descriptions.</p><div class="mix-list">${Object.entries(cats).map(([name,n])=>`<div><span>${esc(name)}</span><strong>${n} vehicle${n===1?'':'s'}</strong><progress max="${Math.max(data.cars.length,1)}" value="${n}">${n}</progress></div>`).join('')||'<p>No vehicles yet.</p>'}</div><p class="fine">Counts describe demo records, not real availability.</p></section></div><section class="welcome-note"><span class="note-mark">↗</span><div><h3>Small details. A smoother workflow.</h3><p>Manage vehicles and customer references without losing sight of the bigger picture.</p></div><a href="#customers">Explore customers →</a></section>`;}
- else {let kind=page==='vehicles'?'cars':'customers';let rows=data[kind].filter(row=>Object.values(row).some(v=>String(v).toLowerCase().includes(query.toLowerCase())));content.innerHTML=header(page==='vehicles'?'Every vehicle. Clearly organised.':'Good records. Better connections.',page==='vehicles'?'Browse your sample fleet, refine the details and keep your inventory up to date.':'Manage fictional customers and their example vehicle references. These are not bookings.',kind)+`<section class="panel"><div class="panel-heading inventory-heading"><div><h2>${page==='vehicles'?'Vehicle inventory':'Customer directory'} <span class="count-pill">${data[kind].length}</span></h2><p>${page==='vehicles'?'Synthetic models and whole-euro daily rental rates.':'The original customer/reference/rate data model, made easier to explore.'}</p></div><label class="search"><span class="sr-only">Search ${page}</span><input id="search" type="search" placeholder="Search ${page}…" value="${esc(query)}"></label></div><div id="records">${table(kind,rows)}</div></section><p class="table-note">${rows.length} of ${data[kind].length} records shown · Changes affect the demonstration only.</p>`;}
- document.title='Fleetdesk · '+(page==='dashboard'?'Overview':page[0].toUpperCase()+page.slice(1));
-}
-function openForm(kind,id){let row=id?data[kind].find(r=>r.id===id):null;if(id&&!row){notify('That record no longer exists. Refreshing the view.',true);render();return;}let form=$('#record-form');form.reset();form.elements.id.value=id||'';form.elements.kind.value=kind;form.elements.label.value=row?.[labels[kind]]||'';form.elements.Reg.value=row?.Reg||'';form.elements.Price.value=row?.Price??'';$('#name-label').textContent=kind==='cars'?'Model and category':'Sample customer name';$('#record-name').placeholder=kind==='cars'?'Toyota Corolla · Compact':'Casey Example';$('#editor-title').textContent=(id?'Edit ':'Add a ')+(kind==='cars'?'vehicle':'customer');$('#save-record').textContent='Save '+(kind==='cars'?'vehicle':'customer')+' →';$('#form-context').textContent=kind==='cars'?'Keep your fleet details simple and consistent.':'Use fictional names only. A vehicle reference is descriptive; it does not create a reservation.';$('#form-error').hidden=true;editor.showModal();}
-async function save(kind,id,record){if(server)return api('./'+(kind==='cars'?'cars':'customer')+(id?'/'+id:''),id?'PUT':'POST',record);let next=structuredClone(data);if(id&&!next[kind].some(r=>r.id===id))throw Error('This record no longer exists.');if(next[kind].some(r=>r.id!==id&&r.Reg.toLowerCase()===record.Reg.toLowerCase()&&(kind==='cars'||r.Name.toLowerCase()===record.Name.toLowerCase())))throw Error('That vehicle reference or customer/reference pair already exists.');id=id||Math.max(0,...next[kind].map(r=>r.id))+1;let index=next[kind].findIndex(r=>r.id===id), row={...record,id};if(index<0)next[kind].push(row);else next[kind][index]=row;persist(next);return row;}
-function ask(title,copy,label,action){$('#confirm-title').textContent=title;$('#confirm-copy').textContent=copy;$('#confirm-action').textContent=label;$('#confirm-error').hidden=true;confirmAction=action;confirm.showModal();}
-document.addEventListener('click',e=>{let add=e.target.closest('[data-add]'), edit=e.target.closest('[data-edit]'), del=e.target.closest('[data-delete]'), close=e.target.closest('[data-close]');if(close&&!pending)$('#'+close.dataset.close).close();if(add)openForm(add.dataset.add);if(edit)openForm(edit.dataset.edit,Number(edit.dataset.id));if(del){let kind=del.dataset.delete,id=Number(del.dataset.id),row=data[kind].find(r=>r.id===id);ask('Delete this '+(kind==='cars'?'vehicle':'customer')+'?',`${kind==='cars'?row.Reg:row.Name} will be removed from the demonstration. You can restore the original sample set with Reset demo data.`,'Delete record',async()=>{if(server)await api('./'+(kind==='cars'?'cars':'customer')+'/'+id,'DELETE');else{let next=structuredClone(data);next[kind]=next[kind].filter(r=>r.id!==id);persist(next);}await load();render();notify('Record deleted. The workspace summary has been updated.');});}});
-$('#record-form').addEventListener('submit',async e=>{e.preventDefault();if(pending)return;let form=e.currentTarget,kind=form.elements.kind.value,id=Number(form.elements.id.value)||null;pending=true;$('#save-record').disabled=true;$('#save-record').textContent='Saving…';try{let record=FleetRules.validate({Reg:form.elements.Reg.value,[labels[kind]]:form.elements.label.value,Price:form.elements.Price.value},labels[kind]);await save(kind,id,record);await load();editor.close();render();notify((kind==='cars'?'Vehicle':'Customer')+(id?' updated.':' added.')+' Your demonstration workspace is up to date.');}catch(error){$('#form-error').hidden=false;$('#form-error').textContent=error.message;$('#form-error').focus();}finally{pending=false;$('#save-record').disabled=false;$('#save-record').textContent='Save '+(kind==='cars'?'vehicle':'customer')+' →';}});
-$('#confirm-action').addEventListener('click',async()=>{if(pending||!confirmAction)return;pending=true;$('#confirm-action').disabled=true;try{await confirmAction();confirm.close();}catch(error){$('#confirm-error').hidden=false;$('#confirm-error').textContent=error.message;}finally{pending=false;$('#confirm-action').disabled=false;}});
-$('#reset').addEventListener('click',()=>ask('Start with a fresh workspace?','This resets all demonstration changes and restores eight vehicles and six fictional customers.','Reset sample data',async()=>{if(server)await api('./api/demo/reset','POST',{});else persist(structuredClone(seed));await load();query='';render();notify('Sample workspace restored: 8 vehicles and 6 fictional customers.');}));
-content.addEventListener('input',e=>{if(e.target.id==='search'){query=e.target.value;let kind=location.hash==='#customers'?'customers':'cars';let rows=data[kind].filter(row=>Object.values(row).some(v=>String(v).toLowerCase().includes(query.toLowerCase())));$('#records').innerHTML=table(kind,rows);$('.table-note').textContent=`${rows.length} of ${data[kind].length} records shown · Changes affect the demonstration only.`;}});
-window.addEventListener('hashchange',()=>{query='';render();$('#main').focus();});
-load().then(render).catch(error=>{content.setAttribute('aria-busy','false');content.innerHTML='<div class="empty"><h1>Your workspace is unavailable.</h1><p>Check that the local server is running, then reload this page. No form data has been submitted.</p><button class="primary" id="reload">Try again</button></div>';notify(error.message,true);$('#reload').onclick=()=>location.reload();});
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s),
+    esc = (v) =>
+      String(v ?? "").replace(
+        /[&<>"']/g,
+        (c) =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[c],
+      );
+  const money = (v) =>
+    new Intl.NumberFormat("en-IE", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    }).format(v);
+  const server = document.body.dataset.mode === "server",
+    key = "fleetdesk-v4",
+    labels = { cars: "Model", customers: "Name" };
+  let data = { cars: [], customers: [], reservations: [] },
+    seed,
+    reservationSpec,
+    pending = false,
+    confirmAction = null,
+    query = "";
+  const content = $("#content"),
+    editor = $("#editor"),
+    confirm = $("#confirm");
+  function notify(text, bad = false) {
+    $("#notice").hidden = false;
+    $("#notice").textContent = text;
+    $("#notice").classList.toggle("bad", bad);
+  }
+  async function api(path, method = "GET", body) {
+    let response;
+    try {
+      response = await fetch(path, {
+        method,
+        headers: body ? { "Content-Type": "application/json" } : {},
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch {
+      throw Error(
+        "The server could not be reached. Your form is preserved; try again.",
+      );
+    }
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      throw Error(
+        "The server returned an unexpected response. Please refresh and try again.",
+      );
+    }
+    if (!response.ok) {
+      const error = Error(
+        result.error || "This action could not be completed.",
+      );
+      error.code = result.code;
+      throw error;
+    }
+    return result;
+  }
+  function persist(next) {
+    try {
+      localStorage.setItem(key, JSON.stringify(next));
+    } catch {
+      throw Error(
+        "Browser storage is unavailable or full. Allow local storage for this demo, then try again.",
+      );
+    }
+    data = next;
+  }
+  function freshSeed() {
+    const next = structuredClone(seed);
+    next.reservations = FleetRentals.seeded(
+      next.cars,
+      next.customers,
+      reservationSpec,
+      FleetRentals.today(),
+    );
+    return next;
+  }
+  function readSaved() {
+    let saved;
+    try {
+      saved = JSON.parse(
+        localStorage.getItem(key) ||
+          localStorage.getItem("fleetdesk-v3") ||
+          "null",
+      );
+      if (!saved) return freshSeed();
+      for (const kind of ["cars", "customers"]) {
+        if (!Array.isArray(saved[kind])) throw Error();
+        const ids = new Set();
+        for (const row of saved[kind]) {
+          FleetRules.validate(row, labels[kind]);
+          if (!Number.isSafeInteger(row.id) || row.id < 1 || ids.has(row.id))
+            throw Error();
+          ids.add(row.id);
+        }
+      }
+      if (!("reservations" in saved)) saved.reservations = [];
+      return FleetRentals.validateSaved(saved);
+    } catch {
+      notify(
+        "Saved demo data was unreadable. The sample workspace has been restored.",
+        true,
+      );
+      return freshSeed();
+    }
+  }
+  async function writeStatic(action) {
+    if (!navigator.locks)
+      throw Error(
+        "This browser cannot safely coordinate demonstration changes. Open the demo in a current browser with Web Locks support.",
+      );
+    return navigator.locks.request("fleetdesk-v4-write", async () => {
+      const next = readSaved(),
+        result = await action(next);
+      FleetRentals.validateSaved(next);
+      persist(next);
+      return result;
+    });
+  }
+  async function load() {
+    if (server) {
+      const [cars, customers, mode, reservations] = await Promise.all([
+        api("./cars"),
+        api("./customer"),
+        api("./api/mode"),
+        api("./api/reservations"),
+      ]);
+      data = { cars, customers, reservations };
+      $("#mode").textContent =
+        mode.mode === "MySQL"
+          ? "Local MySQL mode · Use disposable records"
+          : "Local Flask demo · Synthetic records";
+      $("#reset").hidden = !mode.reset;
+    } else {
+      [seed, reservationSpec] = await Promise.all([
+        api("./demo-data.json"),
+        api("./reservation-seed.json"),
+      ]);
+      data = readSaved();
+      $("#mode").textContent =
+        "Interactive static demo · Browser storage only · No Flask/MySQL";
+    }
+  }
+  const rentalsUI = FleetReservationUI.create({
+    getData: () => data,
+    api,
+    write: writeStatic,
+    load,
+    render,
+    notify,
+    ask,
+    server,
+  });
+  const carGlyph =
+    '<svg viewBox="0 0 110 50" aria-hidden="true"><path d="M9 31h6l11-15h43l16 15h14v10H9zM31 20l-8 11h49L62 20z" fill="currentColor"/><circle cx="28" cy="41" r="7" fill="#f2f5ee" stroke="currentColor" stroke-width="4"/><circle cx="81" cy="41" r="7" fill="#f2f5ee" stroke="currentColor" stroke-width="4"/></svg>';
+  function actions(kind, row) {
+    return `<div class="row-actions"><button type="button" data-edit="${kind}" data-id="${row.id}" aria-label="Edit ${esc(kind === "cars" ? row.Reg : row.Name)}">Edit</button><button type="button" data-delete="${kind}" data-id="${row.id}" aria-label="Delete ${esc(kind === "cars" ? row.Reg : row.Name)}">Delete</button></div>`;
+  }
+  function table(kind, rows, small = false) {
+    if (!rows.length)
+      return `<div class="empty"><span>↗</span><h3>${query ? "No matching records." : "A little room to get started."}</h3><p>${query ? "Try a different name, reference or model." : "Add your first synthetic " + (kind === "cars" ? "vehicle" : "customer") + " to this workspace."}</p>${!query ? `<button class="primary" type="button" data-add="${kind}">Add ${kind === "cars" ? "vehicle" : "customer"} →</button>` : ""}</div>`;
+    return `<div class="table-wrap"><table><thead><tr><th scope="col">${kind === "cars" ? "Vehicle / model" : "Customer / sample name"}</th><th scope="col">Vehicle reference</th><th scope="col">Daily rate</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows
+      .map(
+        (row, i) =>
+          `<tr><td><div class="record-title">${
+            kind === "cars"
+              ? `<span class="car-icon tone-${i % 3}">${carGlyph}</span>`
+              : `<span class="initials">${esc(
+                  row.Name.split(" ")
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join(""),
+                )}</span>`
+          }<div><strong>${esc(kind === "cars" ? row.Model.split(" · ")[0] : row.Name)}</strong><small>${kind === "cars" ? esc(row.Model.split(" · ")[1] || "Example vehicle") : "Fictional customer · #" + String(row.id).padStart(3, "0")}</small></div></div></td><td><span class="reg">${esc(row.Reg)}</span></td><td><strong>${money(row.Price)}</strong><small class="rate-unit"> / day</small></td><td>${small ? '<a class="quiet-link" href="#' + (kind === "cars" ? "vehicles" : "customers") + '">View →</a>' : actions(kind, row)}</td></tr>`,
+      )
+      .join("")}</tbody></table></div>`;
+  }
+  function header(title, copy, kind) {
+    return `<div class="page-heading"><div><span class="eyebrow">YOUR WORKSPACE, AT A GLANCE</span><h1>${title}</h1><p>${copy}</p></div><button type="button" class="primary" data-add="${kind}">＋ Add ${kind === "cars" ? "vehicle" : "customer"}</button></div>`;
+  }
+  function render() {
+    let page = location.hash.slice(1) || "dashboard";
+    if (!["dashboard", "vehicles", "customers", "reservations"].includes(page))
+      page = "dashboard";
+    document
+      .querySelectorAll("nav a")
+      .forEach((a) =>
+        a.setAttribute(
+          "aria-current",
+          a.hash === "#" + page ? "page" : "false",
+        ),
+      );
+    $("#vehicle-count").textContent = data.cars.length;
+    $("#customer-count").textContent = data.customers.length;
+    $("#reservation-count").textContent = data.reservations.length;
+    content.setAttribute("aria-busy", "false");
+    if (page === "dashboard") {
+      let mean = data.cars.length
+          ? Math.round(
+              data.cars.reduce((s, r) => s + r.Price, 0) / data.cars.length,
+            )
+          : 0,
+        cats = {};
+      data.cars.forEach((r) => {
+        let category = r.Model.split(" · ")[1] || "Other";
+        cats[category] = (cats[category] || 0) + 1;
+      });
+      content.innerHTML =
+        header(
+          "A clearer view of your fleet.",
+          "A practical workspace for vehicles, people and the details that connect them.",
+          "cars",
+        ) +
+        `<section class="metrics" aria-label="Calculated workspace summary"><article><span>Vehicles in inventory</span><strong>${data.cars.length.toString().padStart(2, "0")}</strong><small>Example vehicle records</small></article><article><span>Customer records</span><strong>${data.customers.length.toString().padStart(2, "0")}</strong><small>Entirely fictional people</small></article><article><span>Average daily rate</span><strong>${money(mean)}</strong><small>Mean across current vehicles</small></article></section>${rentalsUI.dashboard()}<div class="dashboard-grid"><section class="panel fleet-panel"><div class="panel-heading"><div><h2>Your fleet, in focus.</h2><p>A few examples from your inventory.</p></div><a href="#vehicles">View all vehicles ↗</a></div>${table("cars", data.cars.slice(0, 4), true)}</section><section class="panel fleet-mix"><span class="eyebrow">FLEET COMPOSITION</span><h2>A balanced collection.</h2><p>Categories from the current model descriptions.</p><div class="mix-list">${
+          Object.entries(cats)
+            .map(
+              ([name, n]) =>
+                `<div><span>${esc(name)}</span><strong>${n} vehicle${n === 1 ? "" : "s"}</strong><progress max="${Math.max(data.cars.length, 1)}" value="${n}">${n}</progress></div>`,
+            )
+            .join("") || "<p>No vehicles yet.</p>"
+        }</div><p class="fine">Counts describe demo records, not real availability.</p></section></div><section class="welcome-note"><span class="note-mark">↗</span><div><h3>Small details. A smoother workflow.</h3><p>Manage vehicles and customer references without losing sight of the bigger picture.</p></div><a href="#customers">Explore customers →</a></section>`;
+    } else if (page === "reservations") {
+      content.innerHTML = rentalsUI.render();
+    } else {
+      let kind = page === "vehicles" ? "cars" : "customers";
+      let rows = data[kind].filter((row) =>
+        Object.values(row).some((v) =>
+          String(v).toLowerCase().includes(query.toLowerCase()),
+        ),
+      );
+      content.innerHTML =
+        header(
+          page === "vehicles"
+            ? "Every vehicle. Clearly organised."
+            : "Good records. Better connections.",
+          page === "vehicles"
+            ? "Browse your sample fleet, refine the details and keep your inventory up to date."
+            : "Manage fictional customers and their example vehicle references. These are not bookings.",
+          kind,
+        ) +
+        `<section class="panel"><div class="panel-heading inventory-heading"><div><h2>${page === "vehicles" ? "Vehicle inventory" : "Customer directory"} <span class="count-pill">${data[kind].length}</span></h2><p>${page === "vehicles" ? "Synthetic models and whole-euro daily rental rates." : "The original customer/reference/rate data model, made easier to explore."}</p></div><label class="search"><span class="sr-only">Search ${page}</span><input id="search" type="search" placeholder="Search ${page}…" value="${esc(query)}"></label></div><div id="records">${table(kind, rows)}</div></section><p class="table-note">${rows.length} of ${data[kind].length} records shown · Changes affect the demonstration only.</p>`;
+    }
+    document.title =
+      "Fleetdesk · " +
+      (page === "dashboard"
+        ? "Overview"
+        : page[0].toUpperCase() + page.slice(1));
+  }
+  function openForm(kind, id) {
+    let row = id ? data[kind].find((r) => r.id === id) : null;
+    if (id && !row) {
+      notify("That record no longer exists. Refreshing the view.", true);
+      render();
+      return;
+    }
+    let form = $("#record-form");
+    form.reset();
+    form.elements.id.value = id || "";
+    form.elements.kind.value = kind;
+    form.elements.label.value = row?.[labels[kind]] || "";
+    form.elements.Reg.value = row?.Reg || "";
+    form.elements.Price.value = row?.Price ?? "";
+    $("#name-label").textContent =
+      kind === "cars" ? "Model and category" : "Sample customer name";
+    $("#record-name").placeholder =
+      kind === "cars" ? "Toyota Corolla · Compact" : "Casey Example";
+    $("#editor-title").textContent =
+      (id ? "Edit " : "Add a ") + (kind === "cars" ? "vehicle" : "customer");
+    $("#save-record").textContent =
+      "Save " + (kind === "cars" ? "vehicle" : "customer") + " →";
+    $("#form-context").textContent =
+      kind === "cars"
+        ? "Keep your fleet details simple and consistent."
+        : "Use fictional names only. A vehicle reference is descriptive; it does not create a reservation.";
+    $("#form-error").hidden = true;
+    editor.showModal();
+  }
+  async function save(kind, id, record) {
+    if (server)
+      return api(
+        "./" + (kind === "cars" ? "cars" : "customer") + (id ? "/" + id : ""),
+        id ? "PUT" : "POST",
+        record,
+      );
+    return writeStatic((next) => {
+      if (id && !next[kind].some((r) => r.id === id))
+        throw Error("This record no longer exists.");
+      if (
+        next[kind].some(
+          (r) =>
+            r.id !== id &&
+            r.Reg.toLowerCase() === record.Reg.toLowerCase() &&
+            (kind === "cars" ||
+              r.Name.toLowerCase() === record.Name.toLowerCase()),
+        )
+      )
+        throw Error(
+          "That vehicle reference or customer/reference pair already exists.",
+        );
+      id = id || Math.max(0, ...next[kind].map((r) => r.id)) + 1;
+      const index = next[kind].findIndex((r) => r.id === id),
+        row = { ...record, id };
+      if (index < 0) next[kind].push(row);
+      else next[kind][index] = row;
+      return row;
+    });
+  }
+  function ask(title, copy, label, action) {
+    $("#confirm-title").textContent = title;
+    $("#confirm-copy").textContent = copy;
+    $("#confirm-action").textContent = label;
+    $("#confirm-error").hidden = true;
+    confirmAction = action;
+    confirm.showModal();
+  }
+  document.addEventListener("click", (e) => {
+    let add = e.target.closest("[data-add]"),
+      edit = e.target.closest("[data-edit]"),
+      del = e.target.closest("[data-delete]"),
+      close = e.target.closest("[data-close]");
+    if (close && !pending) $("#" + close.dataset.close).close();
+    if (add) openForm(add.dataset.add);
+    if (edit) openForm(edit.dataset.edit, Number(edit.dataset.id));
+    if (del) {
+      let kind = del.dataset.delete,
+        id = Number(del.dataset.id),
+        row = data[kind].find((r) => r.id === id);
+      ask(
+        "Delete this " + (kind === "cars" ? "vehicle" : "customer") + "?",
+        `${kind === "cars" ? row.Reg : row.Name} will be removed from the demonstration. You can restore the original sample set with Reset demo data.`,
+        "Delete record",
+        async () => {
+          if (server)
+            await api(
+              "./" + (kind === "cars" ? "cars" : "customer") + "/" + id,
+              "DELETE",
+            );
+          else
+            await writeStatic((next) => {
+              if (
+                next.reservations.some(
+                  (r) =>
+                    r[kind === "cars" ? "vehicle_id" : "customer_id"] === id,
+                )
+              )
+                throw Error(
+                  "This record is referenced by reservation history and cannot be deleted.",
+                );
+              next[kind] = next[kind].filter((r) => r.id !== id);
+            });
+          await load();
+          render();
+          notify("Record deleted. The workspace summary has been updated.");
+        },
+      );
+    }
+  });
+  $("#record-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (pending) return;
+    let form = e.currentTarget,
+      kind = form.elements.kind.value,
+      id = Number(form.elements.id.value) || null;
+    pending = true;
+    $("#save-record").disabled = true;
+    $("#save-record").textContent = "Saving…";
+    try {
+      let record = FleetRules.validate(
+        {
+          Reg: form.elements.Reg.value,
+          [labels[kind]]: form.elements.label.value,
+          Price: form.elements.Price.value,
+        },
+        labels[kind],
+      );
+      await save(kind, id, record);
+      await load();
+      editor.close();
+      render();
+      notify(
+        (kind === "cars" ? "Vehicle" : "Customer") +
+          (id ? " updated." : " added.") +
+          " Your demonstration workspace is up to date.",
+      );
+    } catch (error) {
+      $("#form-error").hidden = false;
+      $("#form-error").textContent = error.message;
+      $("#form-error").focus();
+    } finally {
+      pending = false;
+      $("#save-record").disabled = false;
+      $("#save-record").textContent =
+        "Save " + (kind === "cars" ? "vehicle" : "customer") + " →";
+    }
+  });
+  $("#confirm-action").addEventListener("click", async () => {
+    if (pending || !confirmAction) return;
+    pending = true;
+    $("#confirm-action").disabled = true;
+    try {
+      await confirmAction();
+      confirm.close();
+    } catch (error) {
+      $("#confirm-error").hidden = false;
+      $("#confirm-error").textContent = error.message;
+    } finally {
+      pending = false;
+      $("#confirm-action").disabled = false;
+    }
+  });
+  $("#reset").addEventListener("click", () =>
+    ask(
+      "Start with a fresh workspace?",
+      "This resets all demonstration changes and restores eight vehicles, six fictional customers and three sample reservations.",
+      "Reset sample data",
+      async () => {
+        if (server) await api("./api/demo/reset", "POST", {});
+        else await writeStatic((next) => Object.assign(next, freshSeed()));
+        await load();
+        query = "";
+        render();
+        notify(
+          "Sample workspace restored: 8 vehicles, 6 fictional customers and 3 sample reservations.",
+        );
+      },
+    ),
+  );
+  content.addEventListener("input", (e) => {
+    if (e.target.id === "search") {
+      query = e.target.value;
+      let kind = location.hash === "#customers" ? "customers" : "cars";
+      let rows = data[kind].filter((row) =>
+        Object.values(row).some((v) =>
+          String(v).toLowerCase().includes(query.toLowerCase()),
+        ),
+      );
+      $("#records").innerHTML = table(kind, rows);
+      $(".table-note").textContent =
+        `${rows.length} of ${data[kind].length} records shown · Changes affect the demonstration only.`;
+    }
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key === key && !server)
+      load()
+        .then(() => {
+          render();
+          notify(
+            "The workspace changed in another tab. Any quote will be rechecked when confirming.",
+          );
+        })
+        .catch((error) => notify(error.message, true));
+  });
+  window.addEventListener("hashchange", () => {
+    query = "";
+    render();
+    $("#main").focus();
+  });
+  load()
+    .then(render)
+    .catch((error) => {
+      content.setAttribute("aria-busy", "false");
+      content.innerHTML =
+        '<div class="empty"><h1>Your workspace is unavailable.</h1><p>Check that the local server is running, then reload this page. No form data has been submitted.</p><button class="primary" id="reload">Try again</button></div>';
+      notify(error.message, true);
+      $("#reload").onclick = () => location.reload();
+    });
 })();
