@@ -345,3 +345,139 @@ input:focus-visible {
     justify-content: flex-start;
   }
 }
+
+.availability-roster {
+  margin-top: 24px;
+  border-top: 1px solid #d5decf;
+  padding-top: 20px;
+}
+.availability-roster summary {
+  cursor: pointer;
+  color: #28543e;
+  font-weight: 600;
+  min-height: 44px;
+  align-content: center;
+}
+.availability-heading h3 {
+  font:
+    27px Georgia,
+    serif;
+  margin: 15px 0 8px;
+}
+.availability-heading p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.availability-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.availability-card {
+  border: 1px solid #d5decf;
+  background: #fafcf7;
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 0;
+}
+.availability-card h4 {
+  font:
+    21px Georgia,
+    serif;
+  margin: 10px 0;
+}
+.availability-card p,
+.availability-blockers {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.availability-state {
+  font-weight: 600;
+}
+.availability-state.is-free {
+  color: #28543e;
+}
+.availability-state.is-blocked {
+  color: #785123;
+}
+.availability-blockers {
+  padding-left: 18px;
+}
+.availability-card button {
+  min-height: 44px;
+  width: 100%;
+  margin-top: 12px;
+}
+.availability-card button:disabled {
+  color: #6b7166;
+  background: #edf0e8;
+  cursor: not-allowed;
+}
+.reservation-tools {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+}
+.reservation-tools form {
+  flex: 1;
+  min-width: 0;
+}
+.reservation-tools label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.reservation-search-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.reservation-search-actions input {
+  flex: 1;
+  min-width: 160px;
+  background: #fff;
+  border: 1px solid #c9d3c7;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 44px;
+  font: inherit;
+}
+.reservation-tools button {
+  min-height: 44px;
+}
+#reservation-results-count {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.reservation-tools button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 700px) {
+  .availability-grid {
+    grid-template-columns: 1fr;
+  }
+  .reservation-tools {
+    display: block;
+  }
+  .reservation-search-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .reservation-search-actions input {
+    grid-column: 1/-1;
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+  .reservation-tools > #export-reservations {
+    width: 100%;
+    margin-top: 12px;
+  }
+  .availability-card {
+    padding: 16px;
+  }
+}
