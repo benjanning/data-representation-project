@@ -63,6 +63,8 @@ npm run test:browser
 
 The default Python run skips the two opt-in live database checks. Source CI runs those against a fresh, explicitly named `portfolio_integration` MySQL 8.4 database before releasing. Seven JavaScript checks include independent Python CSV round-tripping. Eleven browser journeys exercise the original workflows and the new availability/search/export decisions in both modes. Browser tests start their own Flask/static servers and capture genuine desktop/mobile screens only after meaningful workflows pass. The exported manifest identifies the exact source commit, successful run and image hashes.
 
+To verify the published static capability with the same browser journey, set `FLEETDESK_BASE=https://benjanning.github.io/data-representation-project/` in your shell and run `npx playwright test tests/availability.spec.cjs`. This uses an isolated browser context and starts no local servers. Clear that variable before running the full local suite.
+
 ## Optional MySQL
 
 Use a disposable local MySQL 8.4/InnoDB database. Set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DEMO_USERNAME` and `DEMO_PASSWORD` in your process environment. With `DEMO_MODE` unset or `0`, API access requires the configured Basic credentials. Never use real records or reuse production credentials.

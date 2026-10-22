@@ -25,10 +25,13 @@ async function capture(page, name) {
     fullPage: false,
   });
 }
-for (const [mode, base] of [
-  ["flask", "http://127.0.0.1:5000"],
-  ["static", "http://127.0.0.1:8088"],
-])
+const targets = process.env.FLEETDESK_BASE
+  ? [["static", process.env.FLEETDESK_BASE]]
+  : [
+      ["flask", "http://127.0.0.1:5000"],
+      ["static", "http://127.0.0.1:8088"],
+    ];
+for (const [mode, base] of targets)
   test(`${mode} vehicle availability, selected quote, snapshot search and exact CSV`, async ({
     page,
   }) => {
