@@ -2,7 +2,7 @@
 
 Allocate a synthetic vehicle to a customer for a date range, review a quotation and follow the reservation through cancellation or completion.
 
-![Latest verified release: genuine rental quotation](https://raw.githubusercontent.com/benjanning/data-representation-project/portfolio-published/portfolio/export/assets/rental-quote.jpg)
+![Latest verified release: actual vehicle availability and blocking periods](https://raw.githubusercontent.com/benjanning/data-representation-project/portfolio-published/portfolio/export/assets/availability-roster.jpg)
 
 **Python · Flask · REST APIs · MySQL · JavaScript · Transactional business rules**
 
@@ -16,12 +16,20 @@ Editing vehicle records is useful, but a rental application also has to answer: 
 
 The extension keeps the original vehicle/customer CRUD and adds a separate reservation model. Availability is checked again when the allocation is written. Prices and names are saved as snapshots, and request IDs make a lost-response retry safe.
 
+## From an availability count to a useful decision
+
+The overview now shows which individual vehicles are available for the selected period. Expand **See all vehicles for these dates** to inspect the actual confirmed periods blocking each vehicle. Choose **Quote this vehicle** to enter the existing quotation flow with that vehicle and date range selected. Cancellation releases the allocation; adjacent collection/return boundaries remain valid. This is an advisory view: confirmation still rechecks the authoritative rules and transaction.
+
+Reservations can be searched by stored customer name, vehicle, reference, dates or rental ID, together with the existing status filters. **Export shown reservations CSV** exports exactly that view, including cancelled/completed history and original quotation snapshots. Integer-cent columns preserve exact amounts; these are not revenue. Exports quote commas/newlines/Unicode and prefix formula-like text for spreadsheet safety. They do not rename historical customers when current records change.
+
+Keyboard focus returns to the stable workspace after confirmation and to the search field after search/clear. The roster uses a native disclosure and labelled vehicle actions; mobile layouts stack decisions without page overflow. See [workspace design and evidence](RESERVATION-WORKSPACE.md).
+
 ## A two-minute example
 
-1. Open **Reservations → New reservation**. Choose a fictional customer and a vehicle.
+1. On **Overview**, choose dates and expand the vehicle availability list. Choose an available vehicle, then a fictional customer. You can also start from **Reservations → New reservation**.
 2. Choose collection/return dates and review the calculated quotation. A three-day €68 rental totals €204.
 3. Confirm. Try the same vehicle and overlapping dates again: the application refuses the conflict.
-4. Cancel to release the allocation. Complete a **Return due** example to see preserved history. **Reset demo data** restores the original workspace.
+4. Search the new reservation and export the shown CSV. Cancel to release its allocation; use **History** to inspect its saved quotation. Complete a **Return due** example to preserve completed history. **Reset demo data** restores the original workspace.
 
 ![Latest verified reservation list](https://raw.githubusercontent.com/benjanning/data-representation-project/portfolio-published/portfolio/export/assets/reservations.jpg)
 
@@ -53,7 +61,9 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-The default Python run skips the two opt-in live database checks. Source CI runs those against a fresh, explicitly named `portfolio_integration` MySQL 8.4 database before releasing. Browser tests start their own Flask/static servers and capture genuine desktop/mobile screens only after meaningful workflows pass. The exported manifest identifies the exact source commit, successful run and image hashes.
+The default Python run skips the two opt-in live database checks. Source CI runs those against a fresh, explicitly named `portfolio_integration` MySQL 8.4 database before releasing. Seven JavaScript checks include independent Python CSV round-tripping. Eleven browser journeys exercise the original workflows and the new availability/search/export decisions in both modes. Browser tests start their own Flask/static servers and capture genuine desktop/mobile screens only after meaningful workflows pass. The exported manifest identifies the exact source commit, successful run and image hashes.
+
+To verify the published static capability with the same browser journey, set `FLEETDESK_BASE=https://benjanning.github.io/data-representation-project/` in your shell and run `npx playwright test tests/availability.spec.cjs`. This uses an isolated browser context and starts no local servers. Clear that variable before running the full local suite.
 
 ## Optional MySQL
 

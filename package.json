@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "test:browser": "playwright test",
-    "test:rules": "node --test tests/rules.test.cjs tests/rentals.test.cjs"
+    "test:rules": "node --test tests/rules.test.cjs tests/rentals.test.cjs tests/reservation-view.test.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1"

@@ -11,3 +11,7 @@ The release workflow independently tests both Flask and browser-storage adapters
 
 ## V4 reservation workflow
 The rental quote, reservation list, calculated dashboard and mobile form are genuine captures of the shared Flask/static frontend from tests/reservations.spec.cjs. Fictional names, synthetic vehicles and UTC-relative sample dates are used. Quotes use actual selected rates; confirmed example value is not revenue. CI exports images only after API/domain, Python/JavaScript contract, isolated MySQL and browser checks pass. README images resolve to the verified export branch; its manifest identifies source revision, run and hashes. Original CSS/SVG vehicle glyphs are retained.
+
+## V5 reservation workspace
+
+availability-roster.jpg, reservation-search.jpg, mobile-availability.jpg and mobile-reservation-search.jpg are genuine Chromium captures produced by the passing availability/search/export journeys. Availability and blockers come from actual synthetic records; CSV assertions reconcile the downloaded snapshot. No fabricated statistics or interface images are used.
